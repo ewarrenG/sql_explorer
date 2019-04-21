@@ -4,3 +4,26 @@
     border-left: 1px solid #f2f2f2;
     border-right: 1px solid #ffffff;
 }
+
+#dev_mode {
+    color: yellow;
+}
+
+.svg_hider {
+    height: 100%;
+    width: 100%;
+    color: #123; 
+    top:0; 
+    display: block; 
+    background: #fff; 
+    position:absolute; 
+    z-index:0;
+}
+
+#blackback {
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    height: 49px;
+    background-color: #343a40 !important;
+}

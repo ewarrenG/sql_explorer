@@ -1,16 +1,19 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import {createQuery, apiCall} from './helpers'
 // import './index.css';
 import 'bootstrap/dist/css/bootstrap.css';
+import './index.css'
+import {LoadingSvg} from './LoadingSvg'
 import * as serviceWorker from './serviceWorker';
 import createHistory from "history/createBrowserHistory"
 import queryString from 'query-string'
-import { Alert, Button, Fade, ButtonGroup, DropdownMenu, DropdownItem, NavbarBrand, Navbar, NavbarToggler, Nav, UncontrolledDropdown, Collapse, DropdownToggle, Modal, ModalHeader, ModalBody, ModalFooter, Input, InputGroup, InputGroupAddon } from 'reactstrap';
+import { Alert, Button, Tooltip , ButtonGroup, DropdownMenu, DropdownItem, NavbarBrand, Navbar, NavbarToggler, Nav, UncontrolledDropdown, Collapse, DropdownToggle, Modal, ModalHeader, ModalBody, ModalFooter, Input, InputGroup, InputGroupAddon } from 'reactstrap';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChartLine, faFolderOpen, faCode, faEdit, faPlus, faHeart, faShare, faCheck, faTimes} from '@fortawesome/free-solid-svg-icons'
+import { faChartLine, faFolderOpen, faCode, faEdit, faPlus, faHeart, faShare, faCheck, faTimes, faInfo, faSync} from '@fortawesome/free-solid-svg-icons'
 
-library.add([faChartLine, faFolderOpen, faCode, faEdit, faPlus, faHeart, faShare, faCheck, faTimes
+library.add([faChartLine, faFolderOpen, faCode, faEdit, faPlus, faHeart, faShare, faCheck, faTimes, faInfo, faSync
 ])
 
 const history = createHistory();
@@ -23,19 +26,59 @@ class DashboardFrame extends Component {
   }
 
   handleLoad(){
-    const frame = document.getElementById('looker3')
+    var frame = null;
+    // while (frame == null) {
+      frame = document.getElementById('looker3')
+    // }
     const looker3 = frame.contentDocument || frame.contentWindow.document;
-    looker3.getElementById('lk-title').style.setProperty('--theme-tile_background_color','#343a40');
-    if (looker3.querySelector('#lk-title > div.lk-title-controls-container > div.lk-title-controls.ng-scope > div.dashboard-dropdown.ng-scope.dropdown')) {
-      looker3.querySelector('#lk-title > div.lk-title-controls-container > div.lk-title-controls.ng-scope > div.dashboard-dropdown.ng-scope.dropdown').parentNode.removeChild(looker3.querySelector('#lk-title > div.lk-title-controls-container > div.lk-title-controls.ng-scope > div.dashboard-dropdown.ng-scope.dropdown'))
-    }    
+    const css = `
+    #lk-title { --theme-tile_background_color: #343a40; }
+    div.dashboard-dropdown.ng-scope.dropdown { display: none; }
+    #lk-title div.lk-title-hint { display: none; }
+    #lk-title > div.lk-title-controls-container { margin-right: 10px }
+    #lk-title > div.lk-title-controls-container > div.lk-title-controls.ng-scope > div.button-wrapper > a:hover {
+      color: #fff;
+      background: #64518a;
+      border: 1px solid #64518a;
+      margin-left: 12px;
+    }
+    #lk-title > div.lk-title-controls-container > div.lk-title-controls.ng-scope > div.button-wrapper > a {
+      color: #fff;
+      background: #64518a;
+      border: 1px solid #64518a;
+      margin-left: 12px;
+    }
+    button.btn.btn-default:focus {
+      color: #fff;
+      background: #64518a;
+      border: 1px solid #64518a;
+      margin-left: 12px;
+    }
+    `;
+    var head = looker3.getElementsByTagName('head')[0];
+    var style = looker3.createElement('style');
+    head.appendChild(style);
+    style.id = "testbfw3"
+    style.type = 'text/css';
+    style.appendChild(looker3.createTextNode(css))
     this.props.toggleHidden('isHidden3',true)
     this.props.updateIframeDoneLoading(this.props.iframeDoneLoading,2,true)
+
+    
+
+
+    setInterval(function(){ 
+      var change = looker3.getElementsByTagName('a')
+      for (var i = 0, j =change.length; i < j ; i++) {
+        if( change[i].className === 'looker-vis-context-title-link ' || change[i].innerHTML == 'Explore From Here')
+        change[i].href = change[i].href.replace('/embed/','/')
+        change[i].target = '_blank'
+      }
+     }, 10000);
   }
 
   render() {
     const z = (this.props.rSelected === 'dash' && this.props.iframeDoneLoading[2]) ? 1 : -1;
-    // const dashboard_id = "1";
     const src = (this.props.did) ? '/embed/dashboards/' + this.props.did : '';
     return (
         <iframe
@@ -77,7 +120,7 @@ class SqlFrame extends Component {
       apiCall('GET','/api/internal/core/3.1/queries/slug/'+this.props.qid)
       .then(response => {
         this.setState({
-          exploreFrameSrc: '/embed' + response.url + '&toggle=' + this.props.toggle,
+          exploreFrameSrc: '/embed/explore/' + response.model + '/sql_runner_query?qid=' + response.client_id + '&toggle=' + this.props.toggle,
           vis: response.vis_config
         });
       })
@@ -153,7 +196,7 @@ class SqlFrame extends Component {
       apiCall('POST','/api/internal/core/3.1/queries', '', createQuery(response))
       .then(response => {
         this.setState({
-          exploreFrameSrc: '/embed'+response.url+'&toggle=' + this.props.toggle
+          exploreFrameSrc: '/embed/explore/'+response.model+'/sql_runner_query?qid='+response.client_id+'&toggle=' + this.props.toggle
         })
       })
     })
@@ -163,10 +206,6 @@ class SqlFrame extends Component {
     if (this.state.mutation) {
       this.state.mutation.disconnect();
     }
-
-    // const frame = document.getElementById('looker')
-    // const innerDoc = frame.contentDocument || frame.contentWindow.document;
-    // let slugNode = innerDoc.querySelector("#lk-title > div.lk-title-controls.ng-scope > ul > li:nth-child(5) > a")
 
     let mutation = new MutationObserver(mutations => {
       mutations.some(mutation => {
@@ -204,16 +243,26 @@ class SqlFrame extends Component {
 
   handleLoad() {
     const frame = document.getElementById('looker')
-    const innerDoc = frame.contentDocument || frame.contentWindow.document;
-    innerDoc.getElementById('lk-container').style.top = "0px";
-    if (innerDoc.getElementById('lk-nav-main')) {
-      innerDoc.getElementById('lk-nav-main').parentNode.removeChild(innerDoc.getElementById('lk-nav-main'));
-    }
+    const looker1 = frame.contentDocument || frame.contentWindow.document;
+
+    // #dev-mode-bar { display: none }
+    const css = `
+    #lk-nav-main { display: none; }  
+    #lk-container { top: 0px !important; }
+    #lk-title { background: #343a40; }
+    #lk-title > div.lk-title-controls.ng-scope > div.dropdown-toggle { display: none }
+    `;
+    var head = looker1.getElementsByTagName('head')[0];
+    var style = looker1.createElement('style');
+    head.appendChild(style);
+    style.id = "testbfw"
+    style.type = 'text/css';
+    style.appendChild(looker1.createTextNode(css))
     
     var checkExist = setInterval(() => {
-      if (innerDoc.querySelectorAll("#lk-title > div.lk-title-controls.ng-scope > ul > li").length) {
+      if (looker1.querySelectorAll("#lk-title > div.lk-title-controls.ng-scope > ul > li").length) {
          clearInterval(checkExist);
-         let possibleNodes = innerDoc.querySelectorAll("#lk-title > div.lk-title-controls.ng-scope > ul > li");
+         let possibleNodes = looker1.querySelectorAll("#lk-title > div.lk-title-controls.ng-scope > ul > li");
     
          var slugNode = <></>
          for (var i=0; i<possibleNodes.length; i++) {
@@ -225,25 +274,10 @@ class SqlFrame extends Component {
       }
     }, 100); 
     
-    if ( innerDoc.getElementById('dev-mode-bar')) {
-      innerDoc.getElementById('dev-mode-bar').parentNode.removeChild(innerDoc.getElementById('dev-mode-bar'));
+    if ( looker1.getElementById('dev-mode-bar')) {
+      this.props.updateAppParams({dev_mode: true})
     }
-    if (innerDoc.querySelector("#lk-title > div.lk-title-controls.ng-scope > div.dropdown-toggle")) {
-      innerDoc.querySelector("#lk-title > div.lk-title-controls.ng-scope > div.dropdown-toggle").parentNode.removeChild(innerDoc.querySelector("#lk-title > div.lk-title-controls.ng-scope > div.dropdown-toggle"))
-    }
-
-    var checkExist2 = setInterval(() => {
-      if (innerDoc.getElementById('lk-container') && innerDoc.getElementById('lk-title')) {
-        clearInterval(checkExist2);
-        innerDoc.getElementById('lk-container').style.top = "0px";
-        innerDoc.getElementById('lk-title').style.background = "#343a40";
-      }
-    }, 100); 
     
-    // innerDoc.getElementById('lk-container').style.top = "0px";
-    // innerDoc.getElementById('lk-title').style.background = "#343a40";
-    // #lk-embed-container > lk-explore-dataflux > lk-explore-header > div.title-controls > button.btn.btn-default
-
     this.props.toggleHidden('isHidden1',true)
     this.props.updateIframeDoneLoading(this.props.iframeDoneLoading,0,true)
   }
@@ -288,42 +322,38 @@ class ExploreFrame extends Component {
     if (this.state.interval) {
       clearInterval(this.state.interval);
     }
-    
+
     const frame = document.getElementById('looker2')
     const looker2 = frame.contentDocument || frame.contentWindow.document;
-    // change header to match the black
-    if (looker2.getElementsByTagName('lk-explore-header').length > 0) {
-      looker2.getElementsByTagName('lk-explore-header')[0].style.background = "#343a40";
+    const css = `
+    .lk-space-nav { display: none }
+    div.explore-header-menu.ng-scope.dropdown { display: none }
+    div.space-nav-menu.dropdown { display: none }
+    lk-explore-header > lk-title-hint { display: none }
+    lk-explore-header { background: #343a40; }  
+    
+    button.btn.btn-default:hover {
+      color: #fff;
+      background: #64518a;
+      border: 1px solid #64518a;
+      margin-left: 12px;
     }
-    // remove the space nav
-    if (looker2.getElementsByTagName("lk-space-nav").length > 0 && looker2.getElementsByTagName("lk-space-nav")[0].parentNode) {
-      looker2.getElementsByTagName("lk-space-nav")[0].parentNode.removeChild(looker2.getElementsByTagName("lk-space-nav")[0]);
+    button.btn.btn-default {
+      color: #fff;
+      background: #64518a;
+      border: 1px solid #64518a;
+      margin-left: 12px;
     }
-    // looker2.getElementsByTagName("lk-space-nav")[0].parentNode.removeChild(looker2.getElementsByTagName("lk-space-nav")[0]);
-    // remove the gear icon
-    if (looker2.querySelector("#lk-embed-container > lk-explore-dataflux > lk-explore-header > div.title-controls > div.explore-header-menu.ng-scope.dropdown")) {
-      looker2.querySelector("#lk-embed-container > lk-explore-dataflux > lk-explore-header > div.title-controls > div.explore-header-menu.ng-scope.dropdown").parentNode.removeChild(looker2.querySelector("#lk-embed-container > lk-explore-dataflux > lk-explore-header > div.title-controls > div.explore-header-menu.ng-scope.dropdown"));
-    }
-
-    var editCSS = looker2.createElement('style')
-    editCSS.innerHTML = `
-      .btn-default, .btn-default:focus {
-        color: #fff;
-        background: #64518a;
-        border: 1px solid #64518a;
-        margin-left: 12px;
-      }`;
-      `.btn-default:focus:hover, .btn-default:hover {
-        color: #fff;
-        background: #64518a;
-        border: 1px solid #64518a;
-        margin-left: 12px;
-    }`
-    document.body.appendChild(editCSS);
-    // looker2.querySelector("#lk-title > div.lk-title-controls.ng-scope > div.dropdown-toggle").classList.add('btn-primary')
-    // looker2.querySelector("#lk-title > div.lk-title-controls.ng-scope > div.dropdown-toggle").classList.remove('btn-default')
-    // #lk-embed-container > lk-explore-dataflux > lk-explore-header > div.title-controls > div.explore-header-menu.ng-scope.dropdown
+    `;
+    var head = looker2.getElementsByTagName('head')[0];
+    var style = looker2.createElement('style');
+    head.appendChild(style);
+    style.id = "testbfw2"
+    style.type = 'text/css';
+    style.appendChild(looker2.createTextNode(css))
+    
     var interval = setInterval(()=> {
+  
       if ( !looker2.location ) {
         clearInterval(interval);
       } else if ( this.state.queryParam !== looker2.location.search ) {
@@ -378,10 +408,6 @@ class Frames extends Component {
   render () {
     return (
     <>
-    <div 
-      id="wrapper"
-      style={{ backgroundColor: "red", position:"absolute", zIndex:"0", width:"100%", height:"100%"}}
-    >
     <SqlFrame
       updateAppParams={this.props.updateAppParams}
       sql_slug={this.props.sql_slug}
@@ -400,13 +426,11 @@ class Frames extends Component {
     iframeDoneLoading={this.props.iframeDoneLoading}
     updateIframeDoneLoading={this.props.updateIframeDoneLoading}
     ></DashboardFrame>
-        <div style={{height:"100%", width:"100%", color:"#123", top:"0", display: "block", background: "#fff", position:"absolute", zIndex:"0"}}>
-      { !( this.props.iframeDoneLoading[0] && this.props.iframeDoneLoading[1] && this.props.iframeDoneLoading[2] ) && 
-        <svg height="50%" style={{display: "block", marginTop: "100px", marginLeft:"auto", marginRight:"auto", willChange:"contents"}} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 325.7 139.71"><title>Looker_Logo_Black</title><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path  d="M10.88,113.17V41.23H0v72.33C0,130.61,10.75,139.85,26.43,138v-10.4C18.14,128,10.88,125,10.88,113.17Z"/><path  d="M76.47,120.18c-.46.6-1,1.18-1.46,1.73C75.52,121.36,76,120.78,76.47,120.18Z"/><path  d="M43.26,121.91c-.5-.55-1-1.13-1.45-1.73C42.27,120.78,42.76,121.36,43.26,121.91Z"/><path  d="M73.41,123.48a19.24,19.24,0,0,1-1.73,1.4A19.24,19.24,0,0,0,73.41,123.48Z"/><path  d="M46.59,124.88a20.76,20.76,0,0,1-1.73-1.4A20.76,20.76,0,0,0,46.59,124.88Z"/><path  d="M81.5,107.21c-.08.81-.19,1.62-.34,2.41C81.31,108.83,81.42,108,81.5,107.21Z"/><path  d="M78.9,116.3c-.35.69-.73,1.36-1.13,2C78.17,117.66,78.55,117,78.9,116.3Z"/><path  d="M80.91,110.79q-.28,1.17-.66,2.28Q80.63,112,80.91,110.79Z"/><path  d="M73.41,123.48a21.53,21.53,0,0,0,1.6-1.57A21.53,21.53,0,0,1,73.41,123.48Z"/><path  d="M40.52,118.31c-.41-.65-.78-1.32-1.13-2C39.74,117,40.11,117.66,40.52,118.31Z"/><path  d="M43.26,121.91c.51.55,1.05,1.08,1.6,1.57C44.31,123,43.77,122.46,43.26,121.91Z"/><path  d="M37.12,109.62c-.15-.79-.26-1.6-.34-2.41C36.86,108,37,108.83,37.12,109.62Z"/><path  d="M38,113.07c-.25-.74-.47-1.5-.65-2.28C37.56,111.57,37.78,112.33,38,113.07Z"/><path  d="M59.09,69.33c-18.91,0-33.56,15.87-33.56,35.4,0,19.25,14.65,35,33.56,35s33.55-15.73,33.55-35C92.64,85.2,78.13,69.33,59.09,69.33ZM81.5,107.21c-.08.81-.19,1.62-.34,2.41-.08.39-.16.78-.25,1.17q-.28,1.17-.66,2.28a25,25,0,0,1-1.35,3.23c-.35.69-.73,1.36-1.13,2s-.84,1.27-1.3,1.87-1,1.18-1.46,1.73a21.53,21.53,0,0,1-1.6,1.57,19.24,19.24,0,0,1-1.73,1.4,21,21,0,0,1-25.09,0,20.76,20.76,0,0,1-1.73-1.4c-.55-.49-1.09-1-1.6-1.57s-1-1.13-1.45-1.73a22.13,22.13,0,0,1-1.29-1.87c-.41-.65-.78-1.32-1.13-2A25,25,0,0,1,38,113.07c-.25-.74-.47-1.5-.65-2.28-.1-.39-.18-.78-.26-1.17-.15-.79-.26-1.6-.34-2.41s-.12-1.65-.12-2.48c0-13.68,10.13-24.87,22.43-24.87s22.53,11.19,22.53,24.87C81.62,105.56,81.58,106.39,81.5,107.21Z"/><polygon  points="225.69 71.03 209.5 71.03 179.05 101.08 179.05 41.23 168.03 41.23 168.03 138.02 179.05 138.02 179.05 116.43 191.87 103.93 214.67 138.02 228.01 138.02 199.9 96.13 225.69 71.03"/><path  d="M254.57,129.57c-11,0-21.63-8.21-23-22.11h56.09c.13-23.82-16.46-38.13-33.69-38.13-18.52,0-33.54,15.87-33.54,35.26,0,19.64,15,35,34.19,35,15.43,0,26.82-8.06,31.48-22.37H274.38C270.76,125,264,129.57,254.57,129.57Zm-.65-50.22c9.72,0,18.79,7.28,21.52,18.22H232.16C235,86.12,244.72,79.35,253.92,79.35Z"/><path  d="M303.93,78.57V71H293.3v67h11V99.25c0-13.4,9.85-19.51,21.38-18.86V69.47C318.05,68.55,309,71.42,303.93,78.57Z"/><path  d="M94.77,67.33a13.46,13.46,0,1,1,8-24.28l5.92-5.92A21.23,21.23,0,0,0,94.77,32a21.92,21.92,0,0,0,0,43.84A21.08,21.08,0,0,0,105.28,73l-5-6.86A13.45,13.45,0,0,1,94.77,67.33Z"/><path  d="M116.29,53.88a22.08,22.08,0,0,0-5.09-14.15l-5.85,5.84a13.42,13.42,0,0,1-.78,17.52l4.94,6.75A22,22,0,0,0,116.29,53.88Z"/><path  d="M155,81.69c-10.56-12.87-28.35-16.24-42.66-7.7l6.06,8.82a21.27,21.27,0,0,1,27.24,4.74A26.89,26.89,0,0,1,152,105a24.8,24.8,0,0,1-8.25,18.39,21.52,21.52,0,0,1-30.9-1.76,26,26,0,0,1,1.45-35.71l-6.18-9a33.58,33.58,0,0,0-12.84,25.64c0,11.07,3,19.09,8.78,25.82,12.22,14.16,34.65,15.17,48.12,2.16A36.56,36.56,0,0,0,155,81.69Z"/><path  d="M122.71,12.33a13,13,0,0,0-8.43,3.09L118,19a8.25,8.25,0,1,1,.31,13.78l-3.67,3.65a13,13,0,0,0,8,2.8,13.44,13.44,0,0,0,0-26.88Z"/><path  d="M114.45,25.77a8.19,8.19,0,0,1,1.16-4.19l-3.72-3.49a13.58,13.58,0,0,0,.25,15.71l3.61-3.6A8.19,8.19,0,0,1,114.45,25.77Z"/><path  d="M104.23,13.27a5,5,0,1,1,4.62-3l2.3,2.19a8.39,8.39,0,0,0,1.15-4.22,8.08,8.08,0,1,0-16.15,0,8.16,8.16,0,0,0,8.08,8.23,8,8,0,0,0,4.45-1.37l-2.4-2.25A5,5,0,0,1,104.23,13.27Z"/></g></g>
-        <animate attributeName="fill" values="#343a40FF;#343a4066;#343a40FF" dur="10s" repeatCount="indefinite" /> 
-      </svg> }
-    </div> 
-    </div>
+      <div className="svg_hider">
+        { !( this.props.iframeDoneLoading[0] && this.props.iframeDoneLoading[1] && this.props.iframeDoneLoading[2] ) && <>
+          <LoadingSvg></LoadingSvg> 
+        </> }
+      </div> 
     </> 
     )
 
@@ -487,9 +511,11 @@ class DashButtons extends Component {
   render() {
 
     let dashDisabled = true;
+    let {d_elements} = this.props
+    d_elements = d_elements || []
     if ( this.props.did ) {
       dashDisabled = false;
-      let sql_elements = this.props.d_elements.map(d_element => {
+      let sql_elements = d_elements.map(d_element => {
         if (d_element.query && d_element.query.model.substring(0,5) == 'sql__') {
           return {
             title: d_element.title,
@@ -623,6 +649,7 @@ class VisButtons extends Component {
     };
     this.handleChangeName = this.handleChangeName.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.deselectFields = this.deselectFields.bind(this);
   }
 
   handleChangeName(event) {
@@ -643,6 +670,30 @@ class VisButtons extends Component {
     });
   }
 
+  deselectFields() {
+    const {qid, toggleHidden, updateIframeDoneLoading} = this.props
+    toggleHidden('isHidden2',false)
+    updateIframeDoneLoading(this.props.iframeDoneLoading,1,false)
+    apiCall('GET','/api/internal/core/3.1/queries/slug/'+qid)
+    .then(response => {
+      let obj = {
+        "view": "sql_runner_query",
+        "dynamic_fields": response.dynamic_fields,
+        "sorts": response.sorts, 
+        "model": response.model,
+        "vis_config": response.vis_config
+      }
+      apiCall('POST','/api/internal/core/3.1/queries', '', obj)
+      .then(deselected => {
+        const exploreUrl = '/embed/explore/' + deselected.model + '/sql_runner_query?qid=' + deselected.client_id + '&toggle=' + this.props.toggle
+        document.getElementById('looker2').setAttribute('src',exploreUrl);
+        this.props.updateAppParams({
+          qid: deselected.client_id
+        }) 
+      })
+    })
+  }
+
   render() {
     let visDisabled = true
     if ( this.props.qid ) {
@@ -651,6 +702,7 @@ class VisButtons extends Component {
     return (
       <>
       <Button outline={visDisabled} color="secondary" className="float-left" disabled={visDisabled} onClick={this.toggle}><FontAwesomeIcon icon="plus"/></Button>
+      <Button outline={visDisabled} color="secondary" className="float-left" disabled={visDisabled} onClick={this.deselectFields}><FontAwesomeIcon icon="sync"/></Button>
       <Button outline={visDisabled} color="secondary" className="float-left" disabled={visDisabled} onClick={this.shareClick}><FontAwesomeIcon icon="share"/></Button>
       <Modal isOpen={this.state.modal} toggle={this.toggle}>
         <ModalHeader toggle={this.toggle}>Add Element to Dashboard?</ModalHeader>
@@ -698,6 +750,8 @@ class ModalExample extends Component {
           toggleHidden={this.props.toggleHidden}
           iframeDoneLoading={this.props.iframeDoneLoading}
           updateIframeDoneLoading={this.props.updateIframeDoneLoading}
+          updateAppParams={this.props.updateAppParams}
+          toggle={this.props.toggle}
         ></VisButtons>
       );
     } else if (this.props.rSelected == 'dash') {
@@ -852,10 +906,13 @@ class Navigator extends Component {
       <Navbar 
       style={{height:"49px"}}
       color="dark" className="navbar navbar-dark bg-dark w-75" fixed="top" expand="md">
-        <NavbarBrand className="text-white"><b>SQL Runner 2.1</b>   <small><i>for nubank</i></small></NavbarBrand>
+        <NavbarBrand className="text-white"><b>SQL Runner 2.2</b>   <small><i>for nubank</i></small></NavbarBrand>
                 {/* Add toggler to auto-collapse */}
         <NavbarToggler/>
-        <div className="divider-vertical"></div>
+        { this.props.dev_mode && <>
+        <Tooltip  isOpen={this.state.tooltipOpen} toggle={() => {this.setState({tooltipOpen: !this.state.tooltipOpen});}} target="dev_mode_icon"  placement="right"><div id="dev_mode"><i><small><font color="red">development mode is on, <br></br>please turn off and refresh</font></small></i></div></Tooltip>
+        <Button id="dev_mode_icon" color="danger"><FontAwesomeIcon icon="info"/></Button>
+        <Spacer></Spacer></>}
         <ButtonController 
     updateAppParams={this.updateAppParams}
     sql_slug={this.props.sql_slug}
@@ -944,7 +1001,6 @@ class AddCreateModal extends Component {
     };
     this.handleChangeName = this.handleChangeName.bind(this);
     this.createDashboard = this.createDashboard.bind(this);
-    // this.toggle = this.toggle.bind(this);
   }
 
   createDashboard() {
@@ -955,7 +1011,6 @@ class AddCreateModal extends Component {
     .then(response => {
       this.props.createDashboardUpdateParams(response.id, response.title, response.dashboard_elements);
       this.props.resetObjects();
-      // this.props.toggleFunc();
     })
   }
   
@@ -963,11 +1018,6 @@ class AddCreateModal extends Component {
     this.setState({
       title: event.target.value
     })
-  }
-
-  toggle() {
-    this.props.resetObjects();
-    // this.props.toggleFunc();
   }
 
   render() {
@@ -983,7 +1033,7 @@ class AddCreateModal extends Component {
         </ModalBody>
         <ModalFooter>
           <Button color="info" onClick={this.createDashboard}>Create Dashboard</Button>
-          <Button color="secondary" onClick={this.toggle}>Cancel</Button>
+          <Button color="secondary" onClick={()=>{this.props.resetObjects()}}>Cancel</Button>
         </ModalFooter>
         </Modal>
       </>
@@ -1007,7 +1057,7 @@ class SelectionDropDownController extends Component {
         </>
     }
     if (this.props.objects) {
-      let pages = Math.floor(this.props.objects.length / 10.0)
+      let pages = Math.ceil(this.props.objects.length / 10.0) -1
       if (pages != 0) {
         if ( this.props.contentPage != 0 ) {
           addBack = <><DropdownItem key={'addBack'} onClick={this.props.handleSelection} type={'addBack'} toggle={false} data-id={this.props.contentPage} >Previous Page</DropdownItem></>
@@ -1040,7 +1090,7 @@ class SelectionDropDownController extends Component {
           addCreate = {addCreate}
           handleSelection = {this.props.handleSelection}  
           space = {this.props.space}
-        >hey</SelectionDropdownList>
+        ></SelectionDropdownList>
     </>
     )
   }
@@ -1081,6 +1131,7 @@ class App extends Component {
       isHidden3: false,
       contentPage: 0,
       iframeDoneLoading: [false,false,false],
+      dev_mode: false
     }
   }
 
@@ -1101,9 +1152,7 @@ class App extends Component {
 
 
   toggleHidden(which,way) {
-    var returnObj = {};
-    returnObj[which] = way;
-    this.setState(returnObj);
+    this.setState({[which]:way});
   }
 
   updateIframeDoneLoading(array,index,way) {
@@ -1217,6 +1266,7 @@ class App extends Component {
         }
       })
     } else if (event.target.getAttribute("type") == 'space') {
+      this.setState({contentPage: 0})
       let spaceAPI = apiCall('GET','/api/internal/dataflux/spaces','parent_id='+data_id)
       let dashboardAPI = apiCall('GET','/api/internal/dataflux/dashboards','space_id='+data_id)
   
@@ -1278,6 +1328,7 @@ class App extends Component {
         <>
         <Navigator 
           objects={this.state.objects}
+          dev_mode={this.state.dev_mode}
           updateAppParams={this.updateAppParams}
           handleSelection={this.handleSelection}
           d_name={this.state.d_name}
@@ -1371,39 +1422,6 @@ class Spacer extends Component {
   }
 }
 
-function readCookie(cookieName) {
-  var re = new RegExp('[; ]'+cookieName+'=([^\\s;]*)');
-  var sMatch = (' '+document.cookie).match(re);
-  if (cookieName && sMatch) return unescape(sMatch[1]);
-  return '';
-}
-
-
-function apiCall(method, path, queryParams, payload) {
-  let url = [path, queryParams].join('?')
-  let obj = { 
-    method: method,
-    headers: {
-      "x-csrf-token": readCookie('CSRF-TOKEN')
-    },
-    body: JSON.stringify(payload)
-  }
-  return fetch(url, obj).then(
-    response => response.json())
-}
-
-function createQuery(dynamic_query) {
-	var body = {
-		"model": dynamic_query.model,
-		"view": "sql_runner_query",
-    "fields": dynamic_query.selected,
-    "sorts": dynamic_query.sorts,
-    "dynamic_fields": JSON.stringify(dynamic_query.dynamic_fields),
-    "vis_config": dynamic_query.vis_config
-  };
-  return body;
-}
-
 window.addEventListener('load', () => {
   const values = queryString.parse(document.location.search)
   var [ qid, toggle, sql_slug, did ] = [
@@ -1465,13 +1483,13 @@ window.addEventListener('load', () => {
   .then(values => {
     sql_slug = values[0].sql_slug
     qid = values[0].qid
-    ReactDOM.render( <App 
+    ReactDOM.render( <><div id="blackback"></div><App 
       qid={qid}
       toggle={toggle}
       sql_slug={sql_slug}
       did={did}
       user_missing_permissions={values[1]}
-    />, document.getElementById('app-container'));
+    /></>, document.getElementById('app-container'));
    })
 }, false); 
 
