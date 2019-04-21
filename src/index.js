@@ -54,6 +54,16 @@ class DashboardFrame extends Component {
       border: 1px solid #64518a;
       margin-left: 12px;
     }
+    #lk-embed-container > dataflux-dialog > div > div.dialog-container.open > lk-explore-dataflux > div.center > lk-explore-content > div > div > lk-data-pane > lk-expandable-pane > div.expandable-pane-content-container > expandable-pane-content > div > lk-sql-view > div.ace-editor-container > lk-late-loaded > div > loaded > div.tools > form:nth-child(2) > button {
+      display: none
+    }
+    #lk-embed-container > dataflux-dialog > div > div.dialog-container.open {
+      top: 50px;
+      height: calc(100% - 65px)
+    }
+    #lk-embed-container > dataflux-dialog > div > div.dialog-container.open > lk-explore-dataflux > div.center > lk-explore-content > div > div > lk-data-pane > lk-expandable-pane > div.expandable-pane-content-container > expandable-pane-content > div > lk-sql-view > div.ace-editor-container > lk-late-loaded > div > loaded > div.tools > form:nth-child(1) > button {
+      display: none;
+    }
     `;
     var head = looker3.getElementsByTagName('head')[0];
     var style = looker3.createElement('style');
@@ -74,7 +84,12 @@ class DashboardFrame extends Component {
         change[i].href = change[i].href.replace('/embed/','/')
         change[i].target = '_blank'
       }
-     }, 10000);
+      // revisit later
+      // change = looker3.querySelectorAll('[lk-track-action="Edit Tile"]')
+      // for (i = 0, j =change.length; i < j ; i++) {
+      //   change[i].style.display = 'none'
+      // }
+     }, 5000);
   }
 
   render() {
@@ -161,6 +176,12 @@ class SqlFrame extends Component {
       }
   
       for (var i = 0; i < fields.length; i++) {
+        const snakeCase = string => {
+          return string.replace(/\W+/g, " ")
+            .split(/ |\B(?=[A-Z])/)
+            .map(word => word.toLowerCase())
+            .join('_');
+          };
         if (sql_property_counts[fields[i].sql] > 1 && fields[i].type.substring(0,4) == 'date' && fields[i].type != 'date_time') {
           dates_removed.push(fields[i].name);
         } else if (fields[i].is_numeric) {
@@ -173,7 +194,7 @@ class SqlFrame extends Component {
             "_kind_hint": "measure",
             "_type_hint": "number"
           } 
-          temp.measure = "field"+i;
+          temp.measure = snakeCase(fields[i].label);
           temp.based_on = fields[i].name;
           temp.label = fields[i].label;
           dynamic_fields.push(temp);
@@ -185,6 +206,7 @@ class SqlFrame extends Component {
           }
         }
       }
+      console.log(dynamic_fields)
       return {  "selected": selected, 
                 "dynamic_fields": dynamic_fields, 
                 "sorts": sorts, 
@@ -344,6 +366,15 @@ class ExploreFrame extends Component {
       border: 1px solid #64518a;
       margin-left: 12px;
     }
+    #lk-embed-container > lk-explore-dataflux > div.center > lk-explore-content > div > div > lk-data-pane > lk-expandable-pane > div.expandable-pane-content-container > expandable-pane-content > div > lk-sql-view > div.ace-editor-container > lk-late-loaded > div > loaded > div.tools > form:nth-child(1) > button {
+      display: none;
+    }
+    #lk-embed-container > lk-explore-dataflux > div.center > lk-explore-content > div > div > lk-data-pane > lk-expandable-pane > div.expandable-pane-content-container > expandable-pane-content > div > lk-sql-view > div.ace-editor-container > lk-late-loaded > div > loaded > div.tools > form:nth-child(2) > button {
+      display: none;
+    }
+    #lk-layout-embed > div.modal.fade.ng-isolate-scope.in > div {
+      top: 40px;
+    }
     `;
     var head = looker2.getElementsByTagName('head')[0];
     var style = looker2.createElement('style');
@@ -482,7 +513,7 @@ class DashButtons extends Component {
     document.getElementById('looker').setAttribute('src','/sql/' + event.target.getAttribute('sql_slug'));
     const exploreUrl = '/embed/explore/sql__' + event.target.getAttribute('sql_slug') + '/sql_runner_query?qid=' + event.target.getAttribute('qid') + '&toggle=' + this.props.toggle
     document.getElementById('looker2').setAttribute('src',exploreUrl);
-    this.props.rSelectedJump('sql');
+    this.props.rSelectedJump('vis');
   }
 
   toggle() {
@@ -512,27 +543,26 @@ class DashButtons extends Component {
 
     let dashDisabled = true;
     let {d_elements} = this.props
+    console.log(d_elements)
     d_elements = d_elements || []
     if ( this.props.did ) {
       dashDisabled = false;
       let sql_elements = d_elements.map(d_element => {
-        if (d_element.query && d_element.query.model.substring(0,5) == 'sql__') {
-          return {
-            title: d_element.title,
-            type: 'dashboard_element',
-            d_element_id: d_element.id,
-            qid: d_element.query.client_id,
-            did: d_element.dashboard_id,
-            sql_slug: d_element.query.model.split('sql__')[1]
-          }
-        } 
-      }).filter(function (el) {return el != null;})
+        return {
+          title: d_element.title,
+          type: 'dashboard_element',
+          d_element_id: d_element.id,
+          qid: d_element.query.client_id,
+          did: d_element.dashboard_id,
+          sql_slug: (d_element.query && d_element.query.model.substring(0,5) == 'sql__') ? d_element.query.model.split('sql__')[1]: ''
+        }
+      })
       if (sql_elements.length == 0) {
-        var element_alerts =  ( <><Alert color="warning">No SQL Runner Elements on this Dashboard</Alert></> )
+        var element_alerts =  ( <><Alert color="warning">No Elements on this Dashboard</Alert></> )
       } else {
         var element_alerts = sql_elements.map(sql_element => {
           return (
-            <Alert 
+            <Button           
               key={sql_element.d_element_id + ',' + sql_element.sql_slug}
               sql_slug={sql_element.sql_slug}
               qid={sql_element.qid}
@@ -540,10 +570,12 @@ class DashButtons extends Component {
               value={sql_element.title}
               data-type={sql_element.dashboard_element}
               color="dark"
+              size="sm"
+              block
+              disabled={(sql_element.sql_slug == '')}
               did={sql_element.did}
               onClick={this.jumpToSql}
-              style={{cursor: "pointer"}}
-            >{sql_element.title}</Alert>
+            >{(sql_element.sql_slug == '') ? sql_element.title +' - Not a SQL Tile':  sql_element.title }</Button>
             )
         })
       } 
@@ -555,9 +587,9 @@ class DashButtons extends Component {
     <Spacer></Spacer>
     <Button color="secondary" onClick={this.handleSqlTilesClick}>SQL Tiles</Button>
     <Modal isOpen={this.state.modal} toggle={this.toggle}>
-        <ModalHeader toggle={this.toggle}>List of SQL Tiles on Dashboard</ModalHeader>
+        <ModalHeader toggle={this.toggle}>Dashboard Tiles</ModalHeader>
          <ModalBody >
-           Click to edit SQL of a tile:<br></br><br></br>
+           Click to edit a tile:<br></br><br></br>
            {element_alerts}
          </ModalBody>
          <ModalFooter >
@@ -861,6 +893,8 @@ class Navigator extends Component {
     .then(response => {
       apiCall('PATCH','/api/internal/core/3.1/dashboard_elements/' + d_element_id,'',{query_id: response.id})
       .then(()=>{
+        this.props.toggleHidden('isHidden3',false)
+        this.props.updateIframeDoneLoading(this.props.iframeDoneLoading,2,false)
         document.getElementById('looker3').contentWindow.location.reload()
         this.rSelectedJump('dash')
         this.setState({
@@ -1136,6 +1170,17 @@ class App extends Component {
   }
 
   createDashboardUpdateParams (did, title, d_elements) {
+    if (d_elements.length > 0) {
+      d_elements = d_elements.sort(function(a,b) {
+        let comparison = 0;
+        if (a.title.toUpperCase() > b.title.toUpperCase()) {
+          comparison = 1
+        } else {
+          comparison = -1
+        }
+        return comparison
+      })
+    }
     this.updateIframeDoneLoading(this.state.iframeDoneLoading,2,false);
     this.setState({isHidden3: false, d_elements: d_elements});
     // if (data_id != this.state.did) {
@@ -1163,6 +1208,17 @@ class App extends Component {
   }
 
   updateDashboardElements(d_elements) {
+    if (d_elements.length > 0) {
+      d_elements = d_elements.sort(function(a,b) {
+        let comparison = 0;
+        if (a.title.toUpperCase() > b.title.toUpperCase()) {
+          comparison = 1
+        } else {
+          comparison = -1
+        }
+        return comparison
+      })
+    }
     this.setState({
       d_elements: d_elements
     })
@@ -1232,9 +1288,21 @@ class App extends Component {
     if (this.props.did && this.props.did != '' ) {
       apiCall('GET','/api/internal/core/3.1/dashboards/'+this.props.did)
       .then(response => {
+        let d_elements = response.dashboard_elements
+        if (d_elements.length > 0) {
+          d_elements = d_elements.sort(function(a,b) {
+            let comparison = 0;
+            if (a.title.toUpperCase() > b.title.toUpperCase()) {
+              comparison = 1
+            } else {
+              comparison = -1
+            }
+            return comparison
+          })
+        }
         this.setState({ 
           d_name: response.title,
-          d_elements: response.dashboard_elements
+          d_elements: d_elements
         })
         this.updateAppParams({did: response.id})
       })
@@ -1306,7 +1374,19 @@ class App extends Component {
         this.updateIframeDoneLoading(this.state.iframeDoneLoading,2,false);
         apiCall('GET','/api/internal/core/3.1/dashboards/'+data_id)
         .then(response => {
-          this.setState({ d_elements: response.dashboard_elements })
+          let d_elements = response.dashboard_elements
+          if (d_elements.length > 0) {
+            d_elements = d_elements.sort(function(a,b) {
+              let comparison = 0;
+              if (a.title.toUpperCase() > b.title.toUpperCase()) {
+                comparison = 1
+              } else {
+                comparison = -1
+              }
+              return comparison
+            })
+          }
+          this.setState({ d_elements: d_elements })
         })
         // if (data_id != this.state.did) {
         this.setState({ 
