@@ -11,9 +11,9 @@ import queryString from 'query-string'
 import { Alert, Button, Tooltip , ButtonGroup, DropdownMenu, DropdownItem, NavbarBrand, Navbar, NavbarToggler, Nav, UncontrolledDropdown, Collapse, DropdownToggle, Modal, ModalHeader, ModalBody, ModalFooter, Input, InputGroup, InputGroupAddon } from 'reactstrap';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChartLine, faFolderOpen, faCode, faEdit, faPlus, faHeart, faShare, faCheck, faTimes, faInfo, faSync} from '@fortawesome/free-solid-svg-icons'
+import { faChartLine, faFolderOpen, faCode, faEdit, faPlus, faHeart, faShare, faCheck, faTimes, faInfo, faSync, faExchangeAlt} from '@fortawesome/free-solid-svg-icons'
 
-library.add([faChartLine, faFolderOpen, faCode, faEdit, faPlus, faHeart, faShare, faCheck, faTimes, faInfo, faSync
+library.add([faChartLine, faFolderOpen, faCode, faEdit, faPlus, faHeart, faShare, faCheck, faTimes, faInfo, faSync, faExchangeAlt
 ])
 
 const history = createHistory();
@@ -119,7 +119,8 @@ class SqlFrame extends Component {
     this.state = {
       exploreFrameSrc: '',
       vis: {},
-      sql_url: '/sql/' + this.props.sql_slug
+      sql_url: '/sql/' + this.props.sql_slug,
+      selected: []
     }
 
   }
@@ -154,71 +155,77 @@ class SqlFrame extends Component {
     })
   }
 
-  getQueryMetaData(href, vis) {
+  getQueryMetaData(href, vis, qid, keep_selected) {
     let url = '/api/internal/dataflux/explores/' + href.split('/explore/')[1].split('/')[0] + '::sql_runner_query'
+    var selected = []
+    apiCall('GET','/api/internal/core/3.1/queries/slug/'+qid)
+    .then(current_query => {
+      console.log(current_query)
+      selected = (keep_selected) ? current_query.fields : [] 
+      apiCall('GET',url)
+      .then(response => {
+        var fields = response.fields.dimensions;
+    
+        var dynamic_fields = [];
+        // var selected = [];
+        var sorts = [];
+        var dates_removed = [];
   
-    apiCall('GET',url)
-    .then(response => {
-      var fields = response.fields.dimensions;
-  
-      var dynamic_fields = [];
-      var selected = [];
-      var sorts = [];
-      var dates_removed = [];
-
-      var sql_property_counts = {};
-      for (var i = 0; i < fields.length; i++) {
-        if (sql_property_counts[fields[i].sql]) {
-          sql_property_counts[fields[i].sql] = sql_property_counts[fields[i].sql] + 1;
-        } else {
-          sql_property_counts[fields[i].sql] = 1
-        }
-      }
-  
-      for (var i = 0; i < fields.length; i++) {
-        const snakeCase = string => {
-          return string.replace(/\W+/g, " ")
-            .split(/ |\B(?=[A-Z])/)
-            .map(word => word.toLowerCase())
-            .join('_');
-          };
-        if (sql_property_counts[fields[i].sql] > 1 && fields[i].type.substring(0,4) == 'date' && fields[i].type != 'date_time') {
-          dates_removed.push(fields[i].name);
-        } else if (fields[i].is_numeric) {
-          var temp = {
-            "measure": "",
-            "based_on": "",
-            "expression": "",
-            "label": "",
-            "type": "sum",
-            "_kind_hint": "measure",
-            "_type_hint": "number"
-          } 
-          temp.measure = snakeCase(fields[i].label);
-          temp.based_on = fields[i].name;
-          temp.label = fields[i].label;
-          dynamic_fields.push(temp);
-          selected.push(temp.measure);
-        } else {
-          selected.push(fields[i].name);
-          if (selected.length == 1) {
-            sorts.push(fields[i].name);
+        var sql_property_counts = {};
+        for (var i = 0; i < fields.length; i++) {
+          if (sql_property_counts[fields[i].sql]) {
+            sql_property_counts[fields[i].sql] = sql_property_counts[fields[i].sql] + 1;
+          } else {
+            sql_property_counts[fields[i].sql] = 1
           }
         }
-      }
-      console.log(dynamic_fields)
-      return {  "selected": selected, 
-                "dynamic_fields": dynamic_fields, 
-                "sorts": sorts, 
-                "model": response.model_name,
-                "vis_config": vis
-              };
-    })
-    .then(response => {
-      apiCall('POST','/api/internal/core/3.1/queries', '', createQuery(response))
+    
+        for (var i = 0; i < fields.length; i++) {
+          const snakeCase = string => {
+            return string.replace(/\W+/g, " ")
+              .split(/ |\B(?=[A-Z])/)
+              .map(word => word.toLowerCase())
+              .join('_');
+            };
+          if (sql_property_counts[fields[i].sql] > 1 && fields[i].type.substring(0,4) == 'date' && fields[i].type != 'date_time') {
+            dates_removed.push(fields[i].name);
+          } else if (fields[i].is_numeric) {
+            var temp = {
+              "measure": "",
+              "based_on": "",
+              "expression": "",
+              "label": "",
+              "type": "sum",
+              "_kind_hint": "measure",
+              "_type_hint": "number"
+            } 
+            temp.measure = snakeCase(fields[i].label);
+            temp.based_on = fields[i].name;
+            temp.label = fields[i].label;
+            dynamic_fields.push(temp);
+            if (!keep_selected){
+              selected.push(temp.measure);
+            }
+          } else {
+            selected.push(fields[i].name);
+            if (selected.length == 1) {
+              sorts.push(fields[i].name);
+            }
+          }
+        }
+        return {  "selected": selected, 
+                  "dynamic_fields": dynamic_fields, 
+                  "sorts": sorts, 
+                  "model": response.model_name,
+                  "vis_config": vis
+                };
+      })
       .then(response => {
-        this.setState({
-          exploreFrameSrc: '/embed/explore/'+response.model+'/sql_runner_query?qid='+response.client_id+'&toggle=' + this.props.toggle
+        apiCall('POST','/api/internal/core/3.1/queries', '', createQuery(response))
+        .then(response => {
+          this.setState({
+            exploreFrameSrc: '/embed/explore/'+response.model+'/sql_runner_query?qid='+response.client_id+'&toggle=' + this.props.toggle
+          })
         })
       })
     })
@@ -239,7 +246,7 @@ class SqlFrame extends Component {
               this.props.updateAppParams({
                 sql_slug: mutation.target.href.split('/explore/sql__')[1].split('/')[0]
               })
-              this.getQueryMetaData(mutation.target.href,this.state.vis);
+              this.getQueryMetaData(mutation.target.href,this.state.vis, this.props.qid, this.props.keep_selected);
             }
           }
           return true;
@@ -440,6 +447,7 @@ class Frames extends Component {
     return (
     <>
     <SqlFrame
+      keep_selected={this.props.keep_selected}
       updateAppParams={this.props.updateAppParams}
       sql_slug={this.props.sql_slug}
       qid={this.props.qid}
@@ -543,7 +551,6 @@ class DashButtons extends Component {
 
     let dashDisabled = true;
     let {d_elements} = this.props
-    console.log(d_elements)
     d_elements = d_elements || []
     if ( this.props.did ) {
       dashDisabled = false;
@@ -641,6 +648,7 @@ class SqlButtons extends Component {
     return (
       <>
       <Button outline={sqlDisabled} className="float-left" disabled={sqlDisabled} color="secondary" onClick={this.toggle}><FontAwesomeIcon icon="plus"/></Button>
+      <Button outline={sqlDisabled} className="float-left" disabled={sqlDisabled} color={this.props.keep_selected ? "primary" : "secondary"} onClick={()=>this.props.updateAppParams({keep_selected: !this.props.keep_selected})}><FontAwesomeIcon icon="exchange-alt"/></Button>
       <Button outline={sqlDisabled} className="float-left" disabled={sqlDisabled} color="secondary" onClick={this.shareClick}><FontAwesomeIcon icon="share"/></Button>
       <Modal isOpen={this.state.modal} toggle={this.toggle}>
         <ModalHeader toggle={this.toggle}>Add Element to Dashboard?</ModalHeader>
@@ -807,6 +815,8 @@ class ModalExample extends Component {
           sql_slug={this.props.sql_slug}
           qid={this.props.qid}
           did={this.props.did}
+          keep_selected={this.props.keep_selected}
+          updateAppParams={this.props.updateAppParams}
           updateDashboardElements={this.props.updateDashboardElements}
           iframeDoneLoading={this.props.iframeDoneLoading}
           updateIframeDoneLoading={this.props.updateIframeDoneLoading}
@@ -927,6 +937,7 @@ class Navigator extends Component {
     return (
       <>
       <Frames 
+      keep_selected={this.props.keep_selected}
       sql_slug={this.props.sql_slug}
       qid={this.props.qid}
       did={this.props.did}
@@ -965,6 +976,7 @@ class Navigator extends Component {
       rSelected={this.state.rSelected}
       d_elements={this.props.d_elements}
       updateAppParams={this.props.updateAppParams}
+      keep_selected={this.props.keep_selected}
       rSelectedJump={this.rSelectedJump}
       updateDashboardElements={this.props.updateDashboardElements}
       toggleHidden={this.props.toggleHidden}
@@ -1165,7 +1177,8 @@ class App extends Component {
       isHidden3: false,
       contentPage: 0,
       iframeDoneLoading: [false,false,false],
-      dev_mode: false
+      dev_mode: false,
+      keep_selected: false
     }
   }
 
@@ -1236,13 +1249,13 @@ class App extends Component {
 
       Promise.all([shared, my_space, users, favorites])
       .then(values => {
-        let top_level = values.slice(0,3).map(space=>{
+        let top_level = values.slice(0,3).map((space,i)=>{
           if (space.length > 0) {
             var mapping = {
               type: 'space',
               id: space[0].id,
               name: space[0].name,
-              can_create: (space[0].can.create == true && space[0].name != 'Users') ? "true" : "false" 
+              can_create: (space[0].can.edit_content == true && (space[0].name != 'Users' ) )? "true" : "false" 
             }
             return mapping
           }
@@ -1345,7 +1358,7 @@ class App extends Component {
             type: 'space',
             id: space.id,
             name: space.name,
-            can_create: (space.can.create == true) ? "true" : "false" 
+            can_create: (space.can.edit_content == true) ? "true" : "false" 
           }
         })
         let db = dashboards.map(dashboard=>{
@@ -1407,6 +1420,7 @@ class App extends Component {
       return (
         <>
         <Navigator 
+          keep_selected={this.state.keep_selected}
           objects={this.state.objects}
           dev_mode={this.state.dev_mode}
           updateAppParams={this.updateAppParams}
@@ -1443,9 +1457,9 @@ function SelectionDropdownList(props) {
   if (props.objects.length > 0) {
     const listItems = props.objects.map((object) => {
       var options = []
-      if (object.type == 'dashboard') {
+      if (object && object.type == 'dashboard') {
         options = [true, "chart-line"]
-      } else if (object.type == 'favorite') {
+      } else if (object && object.type == 'favorite') {
         options = [true, "heart"]
       } else {
         options = [false, "folder-open"]
