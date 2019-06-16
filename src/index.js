@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import {createQuery, apiCall} from './helpers'
+import {createQuery, apiCall, d_elements_sorter} from './helpers'
 // import './index.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import './index.css'
@@ -158,9 +158,19 @@ class SqlFrame extends Component {
   getQueryMetaData(href, vis, qid, keep_selected) {
     let url = '/api/internal/dataflux/explores/' + href.split('/explore/')[1].split('/')[0] + '::sql_runner_query'
     var selected = []
-    apiCall('GET','/api/internal/core/3.1/queries/slug/'+qid)
-    .then(current_query => {
-      console.log(current_query)
+    var current_query_promise;
+    if ( qid && qid != '') {
+      current_query_promise = apiCall('GET','/api/internal/core/3.1/queries/slug/'+qid)
+    } else {
+      current_query_promise = new Promise( (resolve, reject) => {
+        resolve({})
+      });
+    }
+    // current_query = apiCall('GET','/api/internal/core/3.1/queries/slug/'+qid)
+    Promise.all([current_query_promise])
+    .then(current_query_promise => {
+      var current_query = current_query_promise[0];
+      keep_selected = (keep_selected && current_query && current_query.fields && current_query.fields.length > 0) ? true : false
       selected = (keep_selected) ? current_query.fields : [] 
       apiCall('GET',url)
       .then(response => {
@@ -207,7 +217,9 @@ class SqlFrame extends Component {
               selected.push(temp.measure);
             }
           } else {
-            selected.push(fields[i].name);
+            if (!keep_selected){
+              selected.push(fields[i].name);
+            }
             if (selected.length == 1) {
               sorts.push(fields[i].name);
             }
@@ -246,7 +258,7 @@ class SqlFrame extends Component {
               this.props.updateAppParams({
                 sql_slug: mutation.target.href.split('/explore/sql__')[1].split('/')[0]
               })
-              this.getQueryMetaData(mutation.target.href,this.state.vis, this.props.qid, this.props.keep_selected);
+              this.getQueryMetaData(mutation.target.href,this.state.vis, this.props.qid, (this.props.keep_selected && this.props.qid && this.props.qid != '') ? true : false );
             }
           }
           return true;
@@ -555,19 +567,40 @@ class DashButtons extends Component {
     if ( this.props.did ) {
       dashDisabled = false;
       let sql_elements = d_elements.map(d_element => {
-        return {
-          title: d_element.title,
-          type: 'dashboard_element',
-          d_element_id: d_element.id,
-          qid: d_element.query.client_id,
-          did: d_element.dashboard_id,
-          sql_slug: (d_element.query && d_element.query.model.substring(0,5) == 'sql__') ? d_element.query.model.split('sql__')[1]: ''
+        if (d_element.look_id && d_element.look_id > 0) {
+          return {
+            title: d_element.look.title,
+            type: 'look',
+            d_element_id: d_element.id,
+            qid: d_element.look.query.client_id,
+            did: d_element.dashboard_id,
+            sql_slug: (d_element.query && d_element.query.model.substring(0,5) == 'sql__') ? d_element.query.model.split('sql__')[1]: ''
+          }
+        } else {
+          return {
+            title: d_element.title,
+            type: 'dashboard_element',
+            d_element_id: d_element.id,
+            qid: d_element.query.client_id,
+            did: d_element.dashboard_id,
+            sql_slug: (d_element.query && d_element.query.model.substring(0,5) == 'sql__') ? d_element.query.model.split('sql__')[1]: ''
+          }
         }
       })
+      
       if (sql_elements.length == 0) {
         var element_alerts =  ( <><Alert color="warning">No Elements on this Dashboard</Alert></> )
       } else {
         var element_alerts = sql_elements.map(sql_element => {
+          var txt = ''
+          if (sql_element.sql_slug == '') {
+            txt = sql_element.title +' - Not a SQL Tile'
+          }
+          else if (sql_element.type == 'look') {
+            txt = sql_element.title + ' - Look (uneditable)'
+          } else {
+            txt = sql_element.title
+          }   
           return (
             <Button           
               key={sql_element.d_element_id + ',' + sql_element.sql_slug}
@@ -582,7 +615,7 @@ class DashButtons extends Component {
               disabled={(sql_element.sql_slug == '')}
               did={sql_element.did}
               onClick={this.jumpToSql}
-            >{(sql_element.sql_slug == '') ? sql_element.title +' - Not a SQL Tile':  sql_element.title }</Button>
+            >{txt}</Button>
             )
         })
       } 
@@ -1178,21 +1211,13 @@ class App extends Component {
       contentPage: 0,
       iframeDoneLoading: [false,false,false],
       dev_mode: false,
-      keep_selected: false
+      keep_selected: true
     }
   }
 
   createDashboardUpdateParams (did, title, d_elements) {
     if (d_elements.length > 0) {
-      d_elements = d_elements.sort(function(a,b) {
-        let comparison = 0;
-        if (a.title.toUpperCase() > b.title.toUpperCase()) {
-          comparison = 1
-        } else {
-          comparison = -1
-        }
-        return comparison
-      })
+      d_elements = d_elements_sorter(d_elements)
     }
     this.updateIframeDoneLoading(this.state.iframeDoneLoading,2,false);
     this.setState({isHidden3: false, d_elements: d_elements});
@@ -1221,16 +1246,9 @@ class App extends Component {
   }
 
   updateDashboardElements(d_elements) {
+    
     if (d_elements.length > 0) {
-      d_elements = d_elements.sort(function(a,b) {
-        let comparison = 0;
-        if (a.title.toUpperCase() > b.title.toUpperCase()) {
-          comparison = 1
-        } else {
-          comparison = -1
-        }
-        return comparison
-      })
+      d_elements = d_elements_sorter(d_elements)
     }
     this.setState({
       d_elements: d_elements
@@ -1302,17 +1320,8 @@ class App extends Component {
       apiCall('GET','/api/internal/core/3.1/dashboards/'+this.props.did)
       .then(response => {
         let d_elements = response.dashboard_elements
-        if (d_elements.length > 0) {
-          d_elements = d_elements.sort(function(a,b) {
-            let comparison = 0;
-            if (a.title.toUpperCase() > b.title.toUpperCase()) {
-              comparison = 1
-            } else {
-              comparison = -1
-            }
-            return comparison
-          })
-        }
+
+        d_elements = d_elements_sorter(d_elements)
         this.setState({ 
           d_name: response.title,
           d_elements: d_elements
@@ -1389,15 +1398,7 @@ class App extends Component {
         .then(response => {
           let d_elements = response.dashboard_elements
           if (d_elements.length > 0) {
-            d_elements = d_elements.sort(function(a,b) {
-              let comparison = 0;
-              if (a.title.toUpperCase() > b.title.toUpperCase()) {
-                comparison = 1
-              } else {
-                comparison = -1
-              }
-              return comparison
-            })
+            d_elements = d_elements_sorter(d_elements)
           }
           this.setState({ d_elements: d_elements })
         })

@@ -11,6 +11,13 @@ export function apiCall(method, path, queryParams, payload) {
     response => response.json())
 }
 
+function readCookie(cookieName) {
+  var re = new RegExp('[; ]'+cookieName+'=([^\\s;]*)');
+  var sMatch = (' '+document.cookie).match(re);
+  if (cookieName && sMatch) return unescape(sMatch[1]);
+  return '';
+}
+
 export function createQuery(dynamic_query) {
 	var body = {
 		"model": dynamic_query.model,
@@ -23,9 +30,30 @@ export function createQuery(dynamic_query) {
   return body;
 }
 
-function readCookie(cookieName) {
-  var re = new RegExp('[; ]'+cookieName+'=([^\\s;]*)');
-  var sMatch = (' '+document.cookie).match(re);
-  if (cookieName && sMatch) return unescape(sMatch[1]);
-  return '';
+export function tryJSONParse(s){
+  try{
+      return JSON.parse(s)
+    }catch(e){
+      return undefined
+    }
+}
+
+export function d_elements_sorter(d_elements) {
+  d_elements = d_elements.filter(function( obj ) {
+    return obj.type != 'text';
+  });
+  if (d_elements.length > 0) {
+    d_elements = d_elements.sort(function(a,b) {
+      let a_title = a.title || a.look.title;
+      let b_title = b.title || b.look.title;
+      let comparison = 0;
+      if (a_title.toUpperCase() > b_title.toUpperCase()) {
+        comparison = 1
+      } else {
+        comparison = -1
+      }
+      return comparison
+    })
+  }
+  return d_elements
 }
