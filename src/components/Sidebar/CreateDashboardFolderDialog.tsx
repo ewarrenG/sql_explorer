@@ -37,13 +37,12 @@ const COLUMNS = [
   },
 ]
 
-export function SelectFolderDialog({ look_title, setLookTitle, saving, handleLookSubmit }: any) {
+export function CreateDashboardFolderDialog({ dashboard_title, setDashboardTitle, saving, handleDashboardSubmit }: any) {
   const { user } = useContext(AppContext)
   const { personal_folder_id } = user
   const [columns, setColumns] = useState(COLUMNS)
-  const [can_edit, setCanEdit] = useState(false)
   const [data, setData] = useState<any>([])
-  const [looks, setLooks] = useState<any>([])
+  const [dashboards, setDashboards] = useState<any>([])
   const [bread_crumbs, setBreadCrumbs] = useState<any>([{ id: '0', name: '...Top', edit_content: false }]);
   const [top, setTop] = useState<any>([])
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
@@ -63,9 +62,9 @@ export function SelectFolderDialog({ look_title, setLookTitle, saving, handleLoo
     setTop([s, p, u])
   }
 
-  const getLooks = async (folder) => {
-    const lks = await sdk.ok(sdk.folder_looks(folder, 'title'))
-    setLooks(lks)
+  const getDashboards = async (folder) => {
+    const dbs = await sdk.ok(sdk.folder_dashboards(folder, 'title'))
+    setDashboards(dbs)
   }
 
   const handleChipClick = async (id, i) => {
@@ -85,7 +84,7 @@ export function SelectFolderDialog({ look_title, setLookTitle, saving, handleLoo
     setData(sortedData)
     setColumns(sortedColumns)
     setBreadCrumbs(slice(bread_crumbs, 0, i + 1))
-    getLooks(id)
+    getDashboards(id)
   }
 
   const handleActionClick = async (id, name, edit_content) => {
@@ -100,7 +99,7 @@ export function SelectFolderDialog({ look_title, setLookTitle, saving, handleLoo
     setData(sortedData)
     setColumns(sortedColumns)
     setBreadCrumbs([...bread_crumbs, { id, name, edit_content }])
-    getLooks(id)
+    getDashboards(id)
   }
 
   const onSort = (id, sortDirection) => {
@@ -136,13 +135,13 @@ export function SelectFolderDialog({ look_title, setLookTitle, saving, handleLoo
     </StyledChip>
   })
 
-  const lks: string[] = looks.map(l => l.title)
+  const dbs: string[] = dashboards.map(l => l.title)
   const current: any = last(bread_crumbs)
   let field_validation: any = {}
 
-  if (lks.indexOf(look_title) > -1) {
-    field_validation = { type: 'error', message: 'Look title already exists in folder' }
-  } else if (look_title.length === 0) {
+  if (dbs.indexOf(dashboard_title) > -1) {
+    field_validation = { type: 'error', message: 'Dashboard title already exists in folder' }
+  } else if (dashboard_title.length === 0) {
     field_validation = { type: 'error', message: 'Enter a title' }
   }
 
@@ -164,10 +163,10 @@ export function SelectFolderDialog({ look_title, setLookTitle, saving, handleLoo
             <Heading fontSize="medium" >Enter title</Heading>
             <FieldText
               validationMessage={field_validation}
-              placeholder="Enter look title"
-              value={look_title}
+              placeholder="Enter dashboard title"
+              value={dashboard_title}
               onChange={(e) => {
-                setLookTitle(e.target.value || '')
+                setDashboardTitle(e.target.value || '')
               }}
             />
           </SpaceVertical>
@@ -178,7 +177,7 @@ export function SelectFolderDialog({ look_title, setLookTitle, saving, handleLoo
           width="100px"
           size="small"
           disabled={saving || (current?.id === '0') || !current.edit_content}
-          onClick={()=>{handleLookSubmit(current.id)}}
+          onClick={()=>{handleDashboardSubmit(current.id)}}
           >{(saving) ? <Spinner /> : "Submit"}
         </Button>
         {!current.edit_content && (!(current?.id === '0')) && <Text fontSize="xxsmall">Can't create in this folder</Text>}

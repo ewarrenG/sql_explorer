@@ -1,16 +1,16 @@
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext } from 'react';
 import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
-import { MenuList, MenuItem, Box, SpaceVertical, Heading, Checkbox, Paragraph } from '@looker/components';
-import styled from 'styled-components'
 import AppContext from '../../AppContext';
 import { SidebarContainer, SidebarHeading, SidebarBox, SidebarButton, SidebarText, SidebarCheckbox } from './SidebarComponents';
 import { SidebarGroupDashboard } from './SidebarGroupDashboard';
+import { SidebarDashboardElementEdit } from './SidebarDashboardElementEdit';
 
 export function SidebarDashboard() {
   const {dashboard_options, setDashboardOptions, did} = useContext(AppContext)
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const { extensionSDK } = extensionContext
+  const { dashboard } = useContext(AppContext)
 
   const handleCheck = (id) => {
     setDashboardOptions({...dashboard_options, [id]: !dashboard_options[id]})
@@ -36,6 +36,7 @@ export function SidebarDashboard() {
       {did && <>
         <SidebarHeading>Actions</SidebarHeading>
         <SidebarBox>
+          {dashboard && <SidebarDashboardElementEdit /> }
           <SidebarButton onClick={()=>{extensionSDK.openBrowserWindow(`/dashboards${next}/${did}`)}}>Open in Looker</SidebarButton>
         </SidebarBox>
       </>}

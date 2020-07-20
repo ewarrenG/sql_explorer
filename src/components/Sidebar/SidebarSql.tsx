@@ -34,6 +34,8 @@ export function SidebarSql() {
         {newCheckbox('keep_vis', 'Keep Vis Settings')}
         {newCheckbox('keep_fields', 'Keep Field Selections')}
         {newCheckbox('keep_filters', 'Keep Filters')}
+        {newCheckbox('keep_sorts', 'Keep Sorts')}
+        {newCheckbox('keep_dynamic_fields', 'Keep Custom Fields')}
       </SidebarBox>
       <SidebarGroupDashboard/>
       <SidebarHeading>Actions</SidebarHeading>

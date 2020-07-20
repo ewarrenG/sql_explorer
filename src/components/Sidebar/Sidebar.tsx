@@ -1,4 +1,4 @@
-import { Box, MenuGroup, MenuItem, MenuItemProps, Heading, MenuList } from '@looker/components'
+import { Box, MenuGroup, MenuItem, MenuItemProps, Heading, MenuList, Icon } from '@looker/components'
 import  React, { useContext } from 'react'
 import { Link as RouterLink, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
@@ -10,9 +10,10 @@ import { SidebarSql } from './SidebarSql'
 import { SidebarExplore } from './SidebarExplore'
 import { SidebarDashboard } from './SidebarDashboard'
 import { SidebarLook } from './SidebarLook'
+import { SidebarEditing } from './SidebarEditing'
 
 export const Sidebar: React.FC<SidebarProps> = ({ route }) => {
-  const {search} = useContext(AppContext)
+  const {search, editing} = useContext(AppContext)
 
 
   const getToRoute = (path) => {
@@ -30,6 +31,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ route }) => {
         mb="small"
         fontSize="xlarge"
       >SQL Explorer</Heading>
+
+      { editing && <SidebarEditing /> }
       <StyledRouterLink to={getToRoute(ROUTES.EMBED_SQL)}>
         <MenuItem
           icon="SqlRunner"

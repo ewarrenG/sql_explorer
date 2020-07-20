@@ -63,7 +63,7 @@ export function LookActionList({ type, turnDialogOff, all_looks }: any) {
       last_viewed_at: 'not null',
       sorts: 'last_viewed_at desc',
       deleted: false,
-      limit: 100,
+      limit: 25,
       fields: SEARCH_FIELDS
     }))
     setLooks(sortBy(lk_list, ['title','id'])) 
@@ -114,8 +114,13 @@ export function LookActionList({ type, turnDialogOff, all_looks }: any) {
     lks = looks
   }
 
-
-  lks = filter(lks, o=>{return o.title.toLowerCase().indexOf(keywords.toLowerCase()) > -1 })
+  lks = filter(lks, o=>{
+    console.log(o)
+    let model = (o?.model?.id) ? o.model.id : o.query.model
+    const is_sql = (model.substring(0,5) === 'sql__')
+    const matches_filter = (o.title.toLowerCase().indexOf(keywords.toLowerCase()) > -1 )
+    return (matches_filter && is_sql)
+  })
 
   const Items = () => {
     return lks.map(({ id, title, description, folder }) => {

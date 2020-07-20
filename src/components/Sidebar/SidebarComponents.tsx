@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
-import { Code, Box, Heading, ButtonTransparent, SpaceVertical, DialogManager, DialogContent, Paragraph, Text, FieldCheckbox } from '@looker/components';
+import React from 'react';
+import { Box, Heading, ButtonTransparent, SpaceVertical, Text, FieldCheckbox } from '@looker/components';
 import styled from 'styled-components'
 
 export const SidebarButton = ({children, ...props}) => {

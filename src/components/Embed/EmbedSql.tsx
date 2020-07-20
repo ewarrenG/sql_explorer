@@ -5,7 +5,7 @@ import { LoadingSvg } from "../LoadingSvg"
 import AppContext from "../../AppContext"
 
 export const EmbedSql = () => {
-  const {sql, setSql, sql_embed_path} = useContext(AppContext)
+  const {sql, setSql, setQid, sql_embed_path} = useContext(AppContext)
 
   const [loading, setLoading] = useState(true)
   const [mutation, setMutation] = useState()

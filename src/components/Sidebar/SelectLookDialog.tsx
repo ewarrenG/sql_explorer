@@ -27,12 +27,13 @@ export function SelectLookDialog() {
         maxWidth={"85vw"}
         width={"85vw"}
       >
+
         <DialogContent>
           <LookTabs turnDialogOff={turnDialogOff} />
         </DialogContent>
 
       </Dialog>
-      <SidebarButton onClick={() => setOpen(true)}>Select Look</SidebarButton>
+      <SidebarButton onClick={() => setOpen(true)}>Select SQL Look</SidebarButton>
     </>
   );
 }

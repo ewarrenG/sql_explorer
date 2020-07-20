@@ -7,7 +7,7 @@ import { LookActionList } from './LookActionList';
 import { sortBy, filter } from 'lodash';
 import { LoadingSvg } from '../LoadingSvg';
 
-export const SEARCH_FIELDS = "id,title,description,user_id,folder"
+export const SEARCH_FIELDS = "id,title,description,user_id,folder,model"
 
 export function LookTabs( {turnDialogOff}: any) {
   const [all_looks, setAllLooks] = useState()

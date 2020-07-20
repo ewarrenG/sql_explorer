@@ -91,10 +91,8 @@ export const EmbedExplore = () => {
             columns={1} 
           >
             <Text>You need to run SQL before you can explore it</Text>
-
             <StyledRouterLink to={`/sql${search}`}>
               <Button>Go to SQL</Button>
-
             </StyledRouterLink>
           </Grid>
         </DialogContent>

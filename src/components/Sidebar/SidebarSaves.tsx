@@ -10,7 +10,7 @@ import { DashboardTabs } from './DashboardTabs';
 import { IWriteDashboardElement } from '@looker/sdk/lib/sdk/3.1/models';
 import { useHistory } from 'react-router-dom';
 import { ROUTES } from '../../App';
-import { SelectFolderDialog } from './SelectFolderDialog';
+import { CreateLookFolderDialog } from './CreateLookFolderDialog';
 
 export function SidebarSaves() {
   const [db_open, setDbOpen] = useState(false)
@@ -20,7 +20,7 @@ export function SidebarSaves() {
   const [look_title, setLookTitle] = useState('')
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.coreSDK
-  const { did, qid, dashboard, search, setDashboardRefresh, dashboard_refresh, setLid } = useContext(AppContext)
+  const { did, qid, dashboard, search, setDashboard, setDashboardRefresh, dashboard_refresh, setLid } = useContext(AppContext)
   let history = useHistory();
 
   const handleDbSubmit = async () => {
@@ -33,6 +33,8 @@ export function SidebarSaves() {
       title: (db_title.length) ? db_title : 'New SQL Tile'
     }
     const element = await sdk.ok(sdk.create_dashboard_element(body))
+    const db = await sdk.ok(sdk.dashboard(did))
+    setDashboard(db)
     setDbOpen(false)
     setDashboardRefresh(dashboard_refresh + 1)
     setSaving(false)
@@ -106,7 +108,7 @@ export function SidebarSaves() {
         maxWidth={"35vw"}
         width={"35vw"}
       >
-        <SelectFolderDialog {...{
+        <CreateLookFolderDialog {...{
           look_title,
           setLookTitle,
           saving,

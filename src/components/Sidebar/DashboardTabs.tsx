@@ -6,6 +6,7 @@ import styled from 'styled-components'
 import { DashboardActionList } from './DashboardActionList';
 import { sortBy, filter } from 'lodash';
 import { LoadingSvg } from '../LoadingSvg';
+import { DashboardTabCreateDashboard } from './DashboardTabCreateDashboard';
 
 export const SEARCH_FIELDS = "id,title,description,user_id,folder"
 
@@ -71,7 +72,9 @@ export function DashboardTabs( {turnDialogOff}: any) {
           />
           </TabPanel>
           <TabPanel>
-            Create New Dashboard: Coming Soon
+            <DashboardTabCreateDashboard 
+              turnDialogOff={turnDialogOff}
+            />
           </TabPanel>
         </TabPanels>
       </Tabs>
