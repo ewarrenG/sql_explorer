@@ -1,16 +1,15 @@
 
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
-import { Code, Tooltip, Dialog, DialogContent, DialogHeader, InputText, DialogFooter, Button, Spinner, Heading, SpaceVertical, Grid, Text } from '@looker/components';
-import styled from 'styled-components'
+import { Dialog, DialogContent, DialogHeader, InputText, DialogFooter, Button, Spinner, Text } from '@looker/components';
 import { SidebarButton } from './SidebarComponents';
 import AppContext from '../../AppContext';
-import { DashboardTabs } from './DashboardTabs';
+import { DashboardTabs } from './Dashboard/DashboardTabs';
 import { IWriteDashboardElement } from '@looker/sdk/lib/sdk/3.1/models';
 import { useHistory } from 'react-router-dom';
 import { ROUTES } from '../../App';
-import { CreateLookFolderDialog } from './CreateLookFolderDialog';
+import { CreateLookFolderDialog } from './Look/CreateLookFolderDialog';
 
 export function SidebarSaves() {
   const [db_open, setDbOpen] = useState(false)

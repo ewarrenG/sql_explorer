@@ -2,21 +2,20 @@ import { Box, MenuGroup, MenuItem, MenuItemProps, Heading, MenuList, Icon } from
 import  React, { useContext } from 'react'
 import { Link as RouterLink, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
-import { SidebarProps } from './'
 import omit from 'lodash/omit'
 import { ROUTES } from '../../App'
 import AppContext from '../../AppContext'
 import { SidebarSql } from './SidebarSql'
 import { SidebarExplore } from './SidebarExplore'
-import { SidebarDashboard } from './SidebarDashboard'
-import { SidebarLook } from './SidebarLook'
+import { SidebarDashboard } from './Dashboard/SidebarDashboard'
+import { SidebarLook } from './Look/SidebarLook'
 import { SidebarEditing } from './SidebarEditing'
 
-export const Sidebar: React.FC<SidebarProps> = ({ route }) => {
+export const Sidebar: React.FC<any> = ({ route }) => {
   const {search, editing} = useContext(AppContext)
 
 
-  const getToRoute = (path) => {
+  const getToRoute = (path: string) => {
     return path + search
   }
   

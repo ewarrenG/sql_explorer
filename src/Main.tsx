@@ -1,22 +1,23 @@
-import React, { useState, useEffect, useContext } from 'react';
 import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
-import { Code, Box } from '@looker/components';
+import React, { useState, useEffect, useContext } from 'react';
+import { Box } from '@looker/components';
 import styled from 'styled-components'
-import { useParams, useHistory, Switch, Route, Redirect } from 'react-router-dom';
+import { useHistory, Switch, Route, Redirect } from 'react-router-dom';
 import AppContext from './AppContext'
-import { getAppSearch, apiCall, newSearchUrl, exploreEmbedPath, createDynamicFields, getFields } from './helpers';
+import { getAppSearch, apiCall, newSearchUrl, exploreEmbedPath, getFields } from './helpers';
 import { EmbedSql } from './components/Embed/EmbedSql';
 import { EmbedExplore } from './components/Embed/EmbedExplore';
 import { EmbedDashboard } from './components/Embed';
 import { IApiSession } from '@looker/sdk/lib/sdk/3.1/models';
-import { Sidebar } from './components/Sidebar'
+import { Sidebar } from './components/Sidebar/Sidebar'
 import { ROUTES } from './App';
 import { EmbedLookUnSandbox } from './components/Embed/EmbedLookUnSandbox';
 
 export function Main({route}: any) {
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
-  const sdk = extensionContext.coreSDK
   const hostUrl = extensionContext?.extensionSDK?.lookerHostData?.hostUrl
+  const sdk = extensionContext.coreSDK
+  
   const history = useHistory();
   const { location } = history;
   const app_search_params = getAppSearch(location.search)
@@ -25,13 +26,14 @@ export function Main({route}: any) {
   const [did, setDid] = useState(app_search_params.did)
   const [sql, setSql] = useState(app_search_params.sql)
   const [lid, setLid] = useState(app_search_params.lid)
+  const [toggle, setToggle] = useState(app_search_params.toggle)
+
   const [editing, setEditing] = useState(undefined)
   const [dashboard, setDashboard] = useState()
   const [look, setLook] = useState()
-  const [toggle, setToggle] = useState(app_search_params.toggle)
 
   const [sql_embed_path, setSqlEmbedPath] = useState((app_search_params.sql) ? `/${sql}` : '')
-  const [qid_embed_path, setQidEmbedPath] = useState((app_search_params.qid) ? exploreEmbedPath(app_search_params.qid, app_search_params.toggle) : '')
+  const [qid_embed_path, setQidEmbedPath] = useState((app_search_params.qid) ? exploreEmbedPath(app_search_params.qid, app_search_params.toggle || '') : '')
   const [dashboard_refresh, setDashboardRefresh] = useState(0)
 
   const [sql_options, setSqlOptions] = useState({
@@ -44,7 +46,6 @@ export function Main({route}: any) {
   const [dashboard_options, setDashboardOptions] = useState({})
 
   const [session, setSession] = useState<IApiSession>()
-  const [spaces, setSpaces] = useState()
   const [user, setUser] = useState()
 
 
@@ -62,7 +63,7 @@ export function Main({route}: any) {
 
   useEffect(()=>{
     if (qid && !qid_embed_path) {
-      setQidEmbedPath(exploreEmbedPath(qid, toggle))
+      setQidEmbedPath(exploreEmbedPath(qid, toggle || ''))
     }
   }, [qid])
 
@@ -131,7 +132,7 @@ export function Main({route}: any) {
     
     const q = await sdk.ok(sdk.create_query(nqb,'client_id'))
     setQid(q.client_id)
-    setQidEmbedPath(exploreEmbedPath(q.client_id, toggle))
+    setQidEmbedPath(exploreEmbedPath(q.client_id!, toggle || ''))
   }
 
   const getLook = async () => {

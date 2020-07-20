@@ -1,13 +1,8 @@
-
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext } from 'react';
 import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
-import { MenuList, MenuItem, Box, SpaceVertical, Heading, Checkbox, Paragraph } from '@looker/components';
-import styled from 'styled-components'
 import AppContext from '../../AppContext';
-import { SidebarContainer, SidebarHeading, SidebarBox, SidebarButton, SidebarText, SidebarCheckbox } from './SidebarComponents';
-import { SelectDashboardDialog } from './SelectDashboardDialog';
-import { SidebarGroupDashboard } from './SidebarGroupDashboard';
-import { SidebarSaves } from './SidebarSaves';
+import { SidebarContainer, SidebarHeading, SidebarBox, SidebarButton, SidebarCheckbox } from './SidebarComponents';
+import { SidebarGroupDashboard } from './Dashboard/SidebarGroupDashboard';
 
 export function SidebarSql() {
   const {sql_options, setSqlOptions, sql, dashboard} = useContext(AppContext)
@@ -15,11 +10,11 @@ export function SidebarSql() {
   const { extensionSDK } = extensionContext
   const sdk = extensionContext.coreSDK
 
-  const handleCheck = (id) => {
+  const handleCheck = (id: string) => {
     setSqlOptions({...sql_options, [id]: !sql_options[id]})
   }
 
-  const newCheckbox = (id, label) => {
+  const newCheckbox = (id:string, label:string) => {
     return  <SidebarCheckbox 
       label={label}
       checked={sql_options[id]}

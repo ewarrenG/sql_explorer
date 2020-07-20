@@ -1,12 +1,10 @@
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext } from 'react';
 import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
-import styled from 'styled-components'
 import AppContext from '../../AppContext';
 import { SidebarHeading, SidebarBox, SidebarContainer, SidebarButton, SidebarCheckbox } from './SidebarComponents';
 import { exploreEmbedPath } from '../../helpers';
-import { SelectDashboardDialog } from './SelectDashboardDialog';
-import { SidebarGroupDashboard } from './SidebarGroupDashboard';
+import { SidebarGroupDashboard } from './Dashboard/SidebarGroupDashboard';
 import { SidebarSaves } from './SidebarSaves';
 
 export function SidebarExplore() {
