@@ -12,20 +12,22 @@ import { IApiSession } from '@looker/sdk/lib/sdk/3.1/models';
 import { Sidebar } from './components/Sidebar/Sidebar'
 import { ROUTES } from './App';
 import { EmbedLookUnSandbox } from './components/Embed/EmbedLookUnSandbox';
+import refresh from './MainRefresh';
 
 export function Main({route}: any) {
-  const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
-  const hostUrl = extensionContext?.extensionSDK?.lookerHostData?.hostUrl
-  const sdk = extensionContext.coreSDK
+  let history = useHistory();
+  const extensionContext = useContext<ExtensionContextData>(ExtensionContext);
+  const hostUrl = extensionContext?.extensionSDK?.lookerHostData?.hostUrl;
+  const sdk = extensionContext.coreSDK;
   
-  const history = useHistory();
   const { location } = history;
   const app_search_params = getAppSearch(location.search)
-  const [initial, setInitial] = useState(true)
+  
   const [qid, setQid] = useState(app_search_params.qid)
   const [did, setDid] = useState(app_search_params.did)
   const [sql, setSql] = useState(app_search_params.sql)
   const [lid, setLid] = useState(app_search_params.lid)
+  const [selection, setSelection] = useState(history.location.pathname)
   const [toggle, setToggle] = useState(app_search_params.toggle)
 
   const [editing, setEditing] = useState(undefined)
@@ -33,8 +35,12 @@ export function Main({route}: any) {
   const [look, setLook] = useState()
 
   const [sql_embed_path, setSqlEmbedPath] = useState((app_search_params.sql) ? `/${sql}` : '')
+  
   const [qid_embed_path, setQidEmbedPath] = useState((app_search_params.qid) ? exploreEmbedPath(app_search_params.qid, app_search_params.toggle || '') : '')
-  const [dashboard_refresh, setDashboardRefresh] = useState(0)
+  
+  const [refresh_explore, triggerRefreshExplore] = refresh(0)
+  const [refresh_db, triggerRefreshDb] = refresh(0)
+  
 
   const [sql_options, setSqlOptions] = useState({
     keep_vis: true,
@@ -43,11 +49,12 @@ export function Main({route}: any) {
     keep_sorts: false,
     keep_dynamic_fields: false
   })
-  const [dashboard_options, setDashboardOptions] = useState({})
+  const [dashboard_options, setDashboardOptions] = useState({
+    dashboard_next: true
+  })
 
   const [session, setSession] = useState<IApiSession>()
   const [user, setUser] = useState()
-
 
   useEffect(() => {
     getSessions();
@@ -55,10 +62,7 @@ export function Main({route}: any) {
   }, [])
 
   useEffect(()=>{
-    if (sql && !initial) {
       getQid();
-    }
-    setInitial(false)
   }, [sql])
 
   useEffect(()=>{
@@ -71,7 +75,7 @@ export function Main({route}: any) {
     if (did) {
       getDashboard();
     }
-  }, [did, dashboard_refresh])
+  }, [did, refresh_db])
 
   useEffect(()=>{
     if (lid) {
@@ -79,10 +83,21 @@ export function Main({route}: any) {
     }
   }, [lid])
 
+  const setAppParams = (push_object: any) => {
+    let c = {sql, qid, lid, did, selection, toggle, ...push_object}
+    if (c.sql) setSql(c.sql)
+    if (c.qid) setQid(c.qid)
+    if (c.did) setDid(c.did)
+    if (c.lid) setLid(c.lid)
+    if (c.toggle) setLid(c.toggle)
+    if (c.selection) setSelection(c.selection)
+    history.push(selection + newSearchUrl(c))
+  }
+
 
   useEffect(()=>{
-    history.push(route + newSearchUrl({sql, qid, did, lid, toggle}))
-  }, [sql, qid, did, lid, toggle])
+    history.push(selection + newSearchUrl({sql, qid, did, lid, toggle}))
+  }, [sql, qid, did, lid, toggle, selection])
 
   const getQid = async () => {
     const { 
@@ -156,24 +171,22 @@ export function Main({route}: any) {
   }
 
   const context = {
-    selection: route,
-    qid, setQid,
-    did, setDid,
-    sql, setSql,
-    lid, setLid,
-    toggle, setToggle,
+    selection, 
+    setAppParams,
     search: newSearchUrl({qid,did,sql,lid,toggle}),
     sql_embed_path, setSqlEmbedPath,
+
     qid_embed_path, setQidEmbedPath,
-    dashboard_refresh, setDashboardRefresh,
-    triggerDashboardRefresh: ()=>{setDashboardRefresh(dashboard_refresh+1)},
+    refresh_explore, triggerRefreshExplore,
+
+    refresh_db, triggerRefreshDb,
     sql_options, setSqlOptions,
     dashboard_options, setDashboardOptions,
     user, session,
     dashboard, look,
+
     setDashboard,
     editing, setEditing,
-    initial, setInitial
   }
   
   return (
@@ -181,23 +194,23 @@ export function Main({route}: any) {
       value={context}
     >
       <Layout>
-        <Sidebar route={route} />
+        <Sidebar selection={selection} />
         <Box >
           <Switch>
             <Route path={"/:selection"}>
-              <StyledBox show={(route === ROUTES.EMBED_SQL)}>
+              <StyledBox show={(selection === ROUTES.EMBED_SQL)}>
                 <EmbedSql />
               </StyledBox>
-              <StyledBox show={(route === ROUTES.EMBED_EXPLORE)}>
+              <StyledBox show={(selection === ROUTES.EMBED_EXPLORE)}>
                 <EmbedExplore />
               </StyledBox>
-              <StyledBox show={(route === ROUTES.EMBED_DASHBOARD)}>
+              <StyledBox show={(selection === ROUTES.EMBED_DASHBOARD)}>
                 <EmbedDashboard />
               </StyledBox>
-              <StyledBox show={(route === ROUTES.EMBED_LOOK)}>
+              <StyledBox show={(selection === ROUTES.EMBED_LOOK)}>
                 <EmbedLookUnSandbox />
               </StyledBox>
-              <StyledBox show={(route === ROUTES.HELP)}>
+              <StyledBox show={(selection === ROUTES.HELP)}>
                 <>Help!</>
               </StyledBox>
             </Route>
@@ -206,7 +219,6 @@ export function Main({route}: any) {
         </Box>
       </Layout>
     </AppContext.Provider>
-
   );
 }
 
@@ -216,7 +228,6 @@ const StyledBox = styled(Box)`
 
 const Layout = styled(Box)`
   display: grid;
-  grid-gap: 20px;
   grid-template-columns: 200px auto;
   width: 100vw;
   height: 100vh;

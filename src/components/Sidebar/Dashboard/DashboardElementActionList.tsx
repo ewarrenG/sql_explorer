@@ -35,7 +35,7 @@ export function DashboardElementActionList({ turnDialogOff, all_elements }: any)
   const [keywords, setKeywords] = useState('')
   const [columns, setColumns] = useState(COLUMNS);
   const [data, setData] = useState(all_elements || []);
-  const { setEditing, toggle, setInitial, setSql, setQid, setQidEmbedPath, setSqlEmbedPath } = useContext(AppContext)
+  const { setEditing, toggle, setAppParams, setQidEmbedPath, setSqlEmbedPath, did } = useContext(AppContext)
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.core40SDK
 
@@ -43,13 +43,15 @@ export function DashboardElementActionList({ turnDialogOff, all_elements }: any)
     const model = (query.model.id) ? query.model.id : query.model 
     const sql = model.replace('sql__','')
 
-    // TODO SWITCH TO EXPLORE ON EDIT
-    // history.push(ROUTES.EMBED_EXPLORE + newSearchUrl({sql, qid: query.client_id, did, lid, toggle}))
-
-    setEditing({deid: id})
-    setInitial(true)
-    setSql(sql)
-    setQid(query.client_id)
+    setEditing({
+      deid: id,
+      did: did
+    })
+    
+    setAppParams({
+      qid: query.client_id,
+      sql: sql,
+    })
     setQidEmbedPath(exploreEmbedPath(query.client_id, toggle))
     setSqlEmbedPath("/"+sql)
   }

@@ -43,7 +43,7 @@ export function LookActionList({ type, turnDialogOff, all_looks }: any) {
   const [looks, setLooks] = useState( all_looks || []);
   const [columns, setColumns] = useState(COLUMNS);
   const [loading, setLoading] = useState(true);
-  const { user, setLid } = useContext(AppContext)
+  const { user, setAppParams } = useContext(AppContext)
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.core40SDK
 
@@ -115,7 +115,6 @@ export function LookActionList({ type, turnDialogOff, all_looks }: any) {
   }
 
   lks = filter(lks, o=>{
-    console.log(o)
     let model = (o?.model?.id) ? o.model.id : o.query.model
     const is_sql = (model.substring(0,5) === 'sql__')
     const matches_filter = (o.title.toLowerCase().indexOf(keywords.toLowerCase()) > -1 )
@@ -130,7 +129,7 @@ export function LookActionList({ type, turnDialogOff, all_looks }: any) {
           id={id}
           key={id}
           onClick={() => {
-            setLid(id);
+            setAppParams({lid: id});
             turnDialogOff();  
           }}
         >

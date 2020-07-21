@@ -1,4 +1,4 @@
-import { Box, MenuGroup, MenuItem, MenuItemProps, Heading, MenuList, Icon } from '@looker/components'
+import { Box, StyledMenuItemProps, Heading, MenuList, Icon } from '@looker/components'
 import  React, { useContext } from 'react'
 import { Link as RouterLink, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
@@ -10,14 +10,11 @@ import { SidebarExplore } from './SidebarExplore'
 import { SidebarDashboard } from './Dashboard/SidebarDashboard'
 import { SidebarLook } from './Look/SidebarLook'
 import { SidebarEditing } from './SidebarEditing'
+import { StyledMenuItem } from './SidebarComponents'
 
-export const Sidebar: React.FC<any> = ({ route }) => {
-  const {search, editing} = useContext(AppContext)
+export const Sidebar: React.FC<any> = ({ selection }) => {
+  const {search, editing, setAppParams} = useContext(AppContext)
 
-
-  const getToRoute = (path: string) => {
-    return path + search
-  }
   
   return (
     <Box 
@@ -30,46 +27,45 @@ export const Sidebar: React.FC<any> = ({ route }) => {
         mb="small"
         fontSize="xlarge"
       >SQL Explorer</Heading>
-
-      { editing && <SidebarEditing /> }
-      <StyledRouterLink to={getToRoute(ROUTES.EMBED_SQL)}>
-        <MenuItem
+      <StyledRouterLink onClick={()=>{setAppParams({selection: ROUTES.EMBED_SQL})}}>
+        <StyledMenuItem
           icon="SqlRunner"
-          current={route === ROUTES.EMBED_SQL}
-          selected={route === ROUTES.EMBED_SQL}
+          current={selection === ROUTES.EMBED_SQL}
+          selected={selection === ROUTES.EMBED_SQL}
         >
           Write SQL
-          </MenuItem>
+          </StyledMenuItem>
       </StyledRouterLink>
-      {(route === ROUTES.EMBED_SQL) && <SidebarSql /> }
-      <StyledRouterLink to={getToRoute(ROUTES.EMBED_EXPLORE)}>
-        <MenuItem icon="Explore" current={route === ROUTES.EMBED_EXPLORE}>
+      {(selection === ROUTES.EMBED_SQL) && <SidebarSql /> }
+      <StyledRouterLink onClick={()=>{setAppParams({selection: ROUTES.EMBED_EXPLORE})}}>
+        <StyledMenuItem icon="Explore" current={selection === ROUTES.EMBED_EXPLORE}>
           Explore SQL
-          </MenuItem>
+          </StyledMenuItem>
       </StyledRouterLink>
-      {(route === ROUTES.EMBED_EXPLORE) && <SidebarExplore/> }
-      <StyledRouterLink to={getToRoute(ROUTES.EMBED_DASHBOARD)}>
-        <MenuItem icon="Dashboard" current={route === ROUTES.EMBED_DASHBOARD}>
+      {(selection === ROUTES.EMBED_EXPLORE) && <SidebarExplore/> }
+      <StyledRouterLink onClick={()=>{setAppParams({selection: ROUTES.EMBED_DASHBOARD})}}>
+        <StyledMenuItem icon="Dashboard" current={selection === ROUTES.EMBED_DASHBOARD}>
           View Dashboard
-          </MenuItem>
+          </StyledMenuItem>
       </StyledRouterLink>
-      {(route === ROUTES.EMBED_DASHBOARD) && <SidebarDashboard /> }
-      <StyledRouterLink to={getToRoute(ROUTES.EMBED_LOOK)}>
-        <MenuItem icon="Reports" current={route === ROUTES.EMBED_LOOK}>
+      {(selection === ROUTES.EMBED_DASHBOARD) && <SidebarDashboard /> }
+      <StyledRouterLink onClick={()=>{setAppParams({selection: ROUTES.EMBED_LOOK})}}>
+        <StyledMenuItem icon="Reports" current={selection === ROUTES.EMBED_LOOK}>
           View Look
-          </MenuItem>
+          </StyledMenuItem>
       </StyledRouterLink>
-      {(route === ROUTES.EMBED_LOOK) && <SidebarLook /> }
-      <StyledRouterLink to={getToRoute(ROUTES.EMBED_LOOK)}>
-        <MenuItem icon="Help" current={route === ROUTES.EMBED_LOOK}>
+      {(selection === ROUTES.EMBED_LOOK) && <SidebarLook /> }
+      <StyledRouterLink onClick={()=>{setAppParams({selection: ROUTES.HELP})}}>
+        <StyledMenuItem icon="Help" current={selection === ROUTES.HELP}>
           Help
-        </MenuItem>
+        </StyledMenuItem>
       </StyledRouterLink>
+      { editing && <SidebarEditing /> }
     </Box>
   )
 }
 
-const StyledRouterLinkInner: React.FC<LinkProps & MenuItemProps> = (props) => (
+const StyledRouterLinkInner: React.FC<LinkProps & StyledMenuItemProps> = (props) => (
   <RouterLink {...omit(props, 'customizationProps')} />
 )
 

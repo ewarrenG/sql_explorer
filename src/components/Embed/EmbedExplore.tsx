@@ -14,7 +14,7 @@ import { omit } from "lodash"
 import { ROUTES } from "../../App"
 
 export const EmbedExplore = () => {
-  const { sql, qid, toggle, setQid, setToggle, qid_embed_path, search, selection } = useContext(AppContext)
+  const { sql, qid, toggle, qid_embed_path, selection, setAppParams } = useContext(AppContext)
 
   const [loading, setLoading] = useState(true)
   const [explore, setExplore] = useState<LookerEmbedExplore>()
@@ -43,8 +43,10 @@ export const EmbedExplore = () => {
   const handlePageChange = (event) => {
     if (event?.page?.absoluteUrl) {
       const url = new URL(event.page.absoluteUrl)
-      setQid(url.searchParams.get('qid'))
-      setToggle(url.searchParams.get('toggle'))
+      setAppParams({
+        qid: url.searchParams.get('qid'),
+        toggle: url.searchParams.get('toggle')
+      })
     }
   }
 
@@ -59,8 +61,6 @@ export const EmbedExplore = () => {
         .withParams({ qid, toggle })
         .appendTo(el)
         .on('explore:ready', () => { setLoading(false) })
-        .on('explore:run:start', console.log)
-        .on('explore:run:complete', console.log)
         .on('page:changed', handlePageChange)
         .build()
         .connect()
@@ -91,7 +91,7 @@ export const EmbedExplore = () => {
             columns={1} 
           >
             <Text>You need to run SQL before you can explore it</Text>
-            <StyledRouterLink to={`/sql${search}`}>
+            <StyledRouterLink onClick={()=>{setAppParams({selection: ROUTES.EMBED_SQL})}}>
               <Button>Go to SQL</Button>
             </StyledRouterLink>
           </Grid>

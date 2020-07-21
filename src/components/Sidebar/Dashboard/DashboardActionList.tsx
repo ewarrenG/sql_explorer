@@ -43,7 +43,7 @@ export function DashboardActionList({ type, turnDialogOff, all_dashboards }: any
   const [dashboards, setDashboards] = useState( all_dashboards || []);
   const [columns, setColumns] = useState(COLUMNS);
   const [loading, setLoading] = useState(true);
-  const { user, setDid } = useContext(AppContext)
+  const { user, setAppParams } = useContext(AppContext)
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.core40SDK
 
@@ -125,7 +125,7 @@ export function DashboardActionList({ type, turnDialogOff, all_dashboards }: any
           id={id}
           key={id}
           onClick={() => {
-            setDid(id);
+            setAppParams({did: id});
             turnDialogOff();  
           }}
         >

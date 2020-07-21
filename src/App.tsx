@@ -3,12 +3,14 @@ import { ComponentsProvider } from '@looker/components'
 import { ExtensionProvider } from '@looker/extension-sdk-react'
 import { Main } from './Main'
 import { hot } from 'react-hot-loader/root'
+import { useHistory } from 'react-router-dom'
 
 export enum ROUTES {
   EMBED_SQL = '/sql',
   EMBED_EXPLORE = '/explore',
   EMBED_DASHBOARD = '/dashboard',
-  EMBED_LOOK = '/look'
+  EMBED_LOOK = '/look',
+  HELP = '/help'
 }
 
 export const App: React.FC<any> = hot(() => {
@@ -19,7 +21,6 @@ export const App: React.FC<any> = hot(() => {
     setRoute(route)
     setRouteState(routeState)
   }
-
 
   return (
     <ExtensionProvider

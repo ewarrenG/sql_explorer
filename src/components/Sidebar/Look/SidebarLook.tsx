@@ -9,11 +9,11 @@ import { useHistory } from 'react-router-dom';
 import { ROUTES } from '../../../App';
 
 export function SidebarLook() {
-  const { lid,  toggle, setEditing, look, setQid, setQidEmbedPath, setSql, setSqlEmbedPath, editing, setInitial, } = useContext(AppContext)
+  const { lid,  toggle, setEditing, look, setQidEmbedPath, setSqlEmbedPath, editing, setAppParams} = useContext(AppContext)
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const { extensionSDK } = extensionContext
   const sdk = extensionContext.coreSDK
-  let history = useHistory();
+
 
   const handleLookEdit = async () => {
     var lk: any
@@ -26,13 +26,13 @@ export function SidebarLook() {
     const model = (query.model.id) ? query.model.id : query.model 
     const sql = model.replace('sql__','')
 
-    // TODO SWITCH TO EXPLORE ON EDIT
-    // history.push(ROUTES.EMBED_EXPLORE + newSearchUrl({sql, qid: query.client_id, did, lid, toggle}))
-
     setEditing({lid})
-    setInitial(true)
-    setSql(sql)
-    setQid(query.client_id)
+    
+    setAppParams({
+      sql,
+      qid: query.client_id,
+      selection: ROUTES.EMBED_EXPLORE
+    })
     setQidEmbedPath(exploreEmbedPath(query.client_id, toggle))
     setSqlEmbedPath("/"+sql)
   }

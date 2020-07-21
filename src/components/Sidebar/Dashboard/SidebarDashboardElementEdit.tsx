@@ -1,24 +1,17 @@
 
-import React, { useState, useEffect, useContext } from 'react';
-import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
+import React, { useState, useContext } from 'react';
 import { DialogContent, Dialog, DialogHeader } from '@looker/components';
 import { SidebarButton } from '../SidebarComponents';
 import AppContext from '../../../AppContext';
-import { DashboardTabs } from './DashboardTabs';
-import { ROUTES } from '../../../App';
 import { DashboardElementActionList } from './DashboardElementActionList';
 import { filter } from 'lodash';
 
 
 export function SidebarDashboardElementEdit() {
   const [open, setOpen] = useState(false)
-    const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
-  const sdk = extensionContext.coreSDK
-  const { did, dashboard } = useContext(AppContext)
 
-  useEffect(() => {
+  const { dashboard } = useContext(AppContext)
 
-  }, [])
 
   const turnDialogOff = () => { setOpen(false) }
   const all_elements = filter(dashboard.dashboard_elements, (e: any)=>{
@@ -30,8 +23,8 @@ export function SidebarDashboardElementEdit() {
       <Dialog
         isOpen={open}
         onClose={() => turnDialogOff()}
-        maxWidth={"35vw"}
-        width={"35vw"}
+        maxWidth={"55vw"}
+        width={"55vw"}
       >
         <DialogHeader>Choose a SQL tile to edit</DialogHeader>
         <DialogContent>

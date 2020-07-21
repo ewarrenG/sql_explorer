@@ -8,7 +8,7 @@ import { SidebarGroupDashboard } from './Dashboard/SidebarGroupDashboard';
 import { SidebarSaves } from './SidebarSaves';
 
 export function SidebarExplore() {
-  const { sql_options, setSqlOptions, sql, qid, toggle, setQid, setQidEmbedPath } = useContext(AppContext)
+  const { sql_options, setSqlOptions, sql, qid, toggle, setQid, setQidEmbedPath, setAppParams } = useContext(AppContext)
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const { extensionSDK } = extensionContext
   const sdk = extensionContext.coreSDK
@@ -30,7 +30,9 @@ export function SidebarExplore() {
     const {id, client_id, ...query} = await sdk.ok(sdk.query_for_slug(qid))
     const new_query = await sdk.ok(sdk.create_query({...query, fields: []}))
     const new_qid = new_query.client_id
-    setQid(new_qid)
+    setAppParams({
+      qid: new_qid
+    })
     setQidEmbedPath(exploreEmbedPath(new_qid, toggle))
   }
   

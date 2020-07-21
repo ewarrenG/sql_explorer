@@ -11,7 +11,7 @@ export function DashboardTabCreateDashboard( {turnDialogOff}: any) {
   const [saving, setSaving] = useState(false)
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.coreSDK
-  const {setDid, search} = useContext(AppContext)
+  const {setAppParams} = useContext(AppContext)
   let history = useHistory()
 
   const handleDashboardSubmit = async (folder_id: string) => {
@@ -20,8 +20,10 @@ export function DashboardTabCreateDashboard( {turnDialogOff}: any) {
       folder_id,
       title: dashboard_title
     }))
-    history.push(ROUTES.EMBED_DASHBOARD + search)
-    setDid(dashboard.id)
+    setAppParams({
+      selection: ROUTES.EMBED_DASHBOARD,
+      did: dashboard.id
+    })
     turnDialogOff()
     setSaving(false)
   }

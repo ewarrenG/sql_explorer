@@ -19,8 +19,8 @@ export function SidebarSaves() {
   const [look_title, setLookTitle] = useState('')
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.coreSDK
-  const { did, qid, dashboard, search, setDashboard, setDashboardRefresh, dashboard_refresh, setLid } = useContext(AppContext)
-  let history = useHistory();
+  const { did, qid, dashboard, search, setDashboard, triggerRefreshDb, refresh_db, setAppParams } = useContext(AppContext)
+  
 
   const handleDbSubmit = async () => {
     setSaving(true)
@@ -35,9 +35,10 @@ export function SidebarSaves() {
     const db = await sdk.ok(sdk.dashboard(did))
     setDashboard(db)
     setDbOpen(false)
-    setDashboardRefresh(dashboard_refresh + 1)
+    triggerRefreshDb(refresh_db + 1)
     setSaving(false)
-    history.push(ROUTES.EMBED_DASHBOARD + search)
+    
+    setAppParams({selection: ROUTES.EMBED_DASHBOARD})
   }
 
   const handleLookSubmit = async (folder_id: string) => {
@@ -48,8 +49,7 @@ export function SidebarSaves() {
       query_id: query.id,
       title: look_title
     }, 'id'))
-    history.push(ROUTES.EMBED_LOOK + search)
-    setLid(look.id)
+    setAppParams({selection: ROUTES.EMBED_LOOK, lid: look.id})
     setLookOpen(false)
     setSaving(false)
   }

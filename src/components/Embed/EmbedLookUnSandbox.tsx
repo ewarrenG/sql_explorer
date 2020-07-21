@@ -5,7 +5,7 @@ import { LoadingSvg } from "../LoadingSvg"
 import AppContext from "../../AppContext"
 
 export const EmbedLookUnSandbox = () => {
-  const {lid, setLid} = useContext(AppContext)
+  const {lid} = useContext(AppContext)
   const [loaded, setLoaded] = useState(false)
   const [loading, setLoading] = useState(true)
   const [mutation, setMutation] = useState()

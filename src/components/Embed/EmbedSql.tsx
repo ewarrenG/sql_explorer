@@ -5,7 +5,7 @@ import { LoadingSvg } from "../LoadingSvg"
 import AppContext from "../../AppContext"
 
 export const EmbedSql = () => {
-  const {sql, setSql, setQid, sql_embed_path} = useContext(AppContext)
+  const {sql, setAppParams, sql_embed_path} = useContext(AppContext)
 
   const [loading, setLoading] = useState(true)
   const [mutation, setMutation] = useState()
@@ -42,7 +42,9 @@ export const EmbedSql = () => {
         if (mut.type === 'attributes' && mut.attributeName === 'href' && mut.target.href) {
           if (mut.target.href) {
             if(mut.target.href.split('/explore/sql__')[1].split('/')[0] !== sql) {
-              setSql(mut.target.href.split('/explore/sql__')[1].split('/')[0])
+              setAppParams({
+                sql: mut.target.href.split('/explore/sql__')[1].split('/')[0]
+              })
             }
           }
           return true;
