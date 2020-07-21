@@ -24,7 +24,7 @@ export function Main({route}: any) {
   const pathname = history?.location?.pathname
 
   const app_search_params = getAppSearch(location.search)
-  console.log(app_search_params)
+  
   
   const [qid, setQid] = useState(app_search_params.qid)
   const [did, setDid] = useState(app_search_params.did)
@@ -88,7 +88,6 @@ export function Main({route}: any) {
 
   const setAppParams = (push_object: any) => {
     let c = {sql, qid, lid, did, selection, toggle, ...push_object}
-    console.log(c)
     if (c.sql) setSql(c.sql)
     if (c.qid) setQid(c.qid)
     if (c.did) setDid(c.did)
@@ -97,11 +96,6 @@ export function Main({route}: any) {
     if (c.selection) setSelection(c.selection)
     history.push(selection + newSearchUrl(c))
   }
-
-
-  useEffect(()=>{
-    history.push(selection + newSearchUrl({sql, qid, did, lid, toggle}))
-  }, [sql, qid, did, lid, toggle, selection])
 
   const getQid = async () => {
     const { 

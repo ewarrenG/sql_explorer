@@ -15,10 +15,19 @@ import { ROUTES } from "../../App"
 
 export const EmbedExplore = () => {
   const { sql, qid, toggle, qid_embed_path, selection, setAppParams } = useContext(AppContext)
+  const [ explore_qid, setExploreQid] = useState(qid);
+  const [ explore_toggle, setExploreToggle] = useState(toggle);
 
   const [loading, setLoading] = useState(true)
   const [explore, setExplore] = useState<LookerEmbedExplore>()
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
+
+  useEffect(()=>{
+    setAppParams({
+      qid: explore_qid,
+      toggle: explore_toggle
+    })
+  }, [explore_qid, explore_toggle])
 
   const setupExplore = (explore: LookerEmbedExplore) => {
     setExplore(explore);
@@ -43,10 +52,8 @@ export const EmbedExplore = () => {
   const handlePageChange = (event) => {
     if (event?.page?.absoluteUrl) {
       const url = new URL(event.page.absoluteUrl)
-      setAppParams({
-        qid: url.searchParams.get('qid'),
-        toggle: url.searchParams.get('toggle')
-      })
+      setExploreQid(url.searchParams.get('qid'))
+      setExploreToggle(url.searchParams.get('toggle'))
     }
   }
 
