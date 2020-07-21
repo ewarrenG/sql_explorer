@@ -15,7 +15,9 @@ import { StyledMenuItem } from './SidebarComponents'
 export const Sidebar: React.FC<any> = ({ selection }) => {
   const {search, editing, setAppParams} = useContext(AppContext)
 
-  
+  const updateSelection = (route) => {
+    setAppParams({selection: route})
+  }
   return (
     <Box 
       display="flex" 
@@ -27,7 +29,7 @@ export const Sidebar: React.FC<any> = ({ selection }) => {
         mb="small"
         fontSize="xlarge"
       >SQL Explorer</Heading>
-      <StyledRouterLink onClick={()=>{setAppParams({selection: ROUTES.EMBED_SQL})}}>
+      <StyledRouterLink onClick={()=>{updateSelection(ROUTES.EMBED_SQL)}}>
         <StyledMenuItem
           icon="SqlRunner"
           current={selection === ROUTES.EMBED_SQL}
@@ -37,25 +39,25 @@ export const Sidebar: React.FC<any> = ({ selection }) => {
           </StyledMenuItem>
       </StyledRouterLink>
       {(selection === ROUTES.EMBED_SQL) && <SidebarSql /> }
-      <StyledRouterLink onClick={()=>{setAppParams({selection: ROUTES.EMBED_EXPLORE})}}>
+      <StyledRouterLink onClick={()=>{updateSelection(ROUTES.EMBED_EXPLORE)}}>
         <StyledMenuItem icon="Explore" current={selection === ROUTES.EMBED_EXPLORE}>
           Explore SQL
           </StyledMenuItem>
       </StyledRouterLink>
       {(selection === ROUTES.EMBED_EXPLORE) && <SidebarExplore/> }
-      <StyledRouterLink onClick={()=>{setAppParams({selection: ROUTES.EMBED_DASHBOARD})}}>
+      <StyledRouterLink onClick={()=>{updateSelection(ROUTES.EMBED_DASHBOARD)}}>
         <StyledMenuItem icon="Dashboard" current={selection === ROUTES.EMBED_DASHBOARD}>
           View Dashboard
           </StyledMenuItem>
       </StyledRouterLink>
       {(selection === ROUTES.EMBED_DASHBOARD) && <SidebarDashboard /> }
-      <StyledRouterLink onClick={()=>{setAppParams({selection: ROUTES.EMBED_LOOK})}}>
+      <StyledRouterLink onClick={()=>{updateSelection(ROUTES.EMBED_LOOK)}}>
         <StyledMenuItem icon="Reports" current={selection === ROUTES.EMBED_LOOK}>
           View Look
           </StyledMenuItem>
       </StyledRouterLink>
       {(selection === ROUTES.EMBED_LOOK) && <SidebarLook /> }
-      <StyledRouterLink onClick={()=>{setAppParams({selection: ROUTES.HELP})}}>
+      <StyledRouterLink onClick={()=>{updateSelection(ROUTES.HELP)}}>
         <StyledMenuItem icon="Help" current={selection === ROUTES.HELP}>
           Help
         </StyledMenuItem>

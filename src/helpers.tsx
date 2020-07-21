@@ -34,7 +34,9 @@ export const getAppSearch = (search: string) => {
 }
 
 export const newSearchUrl = (search_obj: any) => {
-  return '?' + new URLSearchParams(appSearchPick(search_obj)).toString()
+  const obj = new URLSearchParams(appSearchPick(search_obj))
+  console.log({obj, string: obj.toString()})
+  return '?' + obj.toString()
 }
 
 export const exploreEmbedPath = (qid:string, toggle:string) => {

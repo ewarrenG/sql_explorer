@@ -14,7 +14,7 @@ import { ROUTES } from './App';
 import { EmbedLookUnSandbox } from './components/Embed/EmbedLookUnSandbox';
 import refresh from './MainRefresh';
 
-export function Main({route}: any) {
+export function Main() {
   let history = useHistory();
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext);
   const hostUrl = extensionContext?.extensionSDK?.lookerHostData?.hostUrl;
@@ -30,7 +30,7 @@ export function Main({route}: any) {
   const [did, setDid] = useState(app_search_params.did)
   const [sql, setSql] = useState(app_search_params.sql)
   const [lid, setLid] = useState(app_search_params.lid)
-  const [selection, setSelection] = useState((pathname && pathname.length > 2) ? pathname : ROUTES.EMBED_SQL)
+  const [selection, setSelection] = useState((pathname && pathname.length >= 2) ? pathname : ROUTES.EMBED_SQL)
   const [toggle, setToggle] = useState(app_search_params.toggle)
 
   const [editing, setEditing] = useState(undefined)
@@ -88,14 +88,20 @@ export function Main({route}: any) {
 
   const setAppParams = (push_object: any) => {
     let c = {sql, qid, lid, did, selection, toggle, ...push_object}
-    if (c.sql) setSql(c.sql)
-    if (c.qid) setQid(c.qid)
-    if (c.did) setDid(c.did)
-    if (c.lid) setLid(c.lid)
-    if (c.toggle) setLid(c.toggle)
-    if (c.selection) setSelection(c.selection)
-    history.push(c.selection + newSearchUrl(c))
+    if (c.sql) {setSql(c.sql)}
+    if (c.qid) {setQid(c.qid)}
+    if (c.did) {setDid(c.did)}
+    if (c.lid) {setLid(c.lid)}
+    if (c.toggle) {setToggle(c.toggle)}
+    if (c.selection) {setSelection(c.selection)}
   }
+
+  useEffect(()=>{
+    let c = {sql, qid, lid, did, selection, toggle}
+    console.log(c)
+    const new_push = selection  + newSearchUrl({sql,did,toggle,lid,qid})
+    history.push(new_push)
+  },[sql,did,toggle,selection,lid,qid])
 
 
   const getQid = async () => {

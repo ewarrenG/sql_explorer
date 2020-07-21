@@ -10,7 +10,7 @@ import { Button, Heading, MenuItemProps, MenuItem, Dialog, DialogContent, Text, 
 import AppContext from "../../AppContext"
 import { LoadingSvg } from "../LoadingSvg"
 import { Link as RouterLink, LinkProps } from 'react-router-dom'
-import { omit } from "lodash"
+import { omit, compact } from "lodash"
 import { ROUTES } from "../../App"
 
 export const EmbedExplore = () => {
@@ -23,10 +23,10 @@ export const EmbedExplore = () => {
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
 
   useEffect(()=>{
-    setAppParams({
-      qid: explore_qid,
-      toggle: explore_toggle
-    })
+    let obj = {}
+    if (explore_qid) { obj['qid'] = explore_qid }
+    if (explore_toggle) { obj['toggle'] = explore_toggle }
+    setAppParams(obj)
   }, [explore_qid, explore_toggle])
 
   const setupExplore = (explore: LookerEmbedExplore) => {
@@ -52,6 +52,7 @@ export const EmbedExplore = () => {
   const handlePageChange = (event) => {
     if (event?.page?.absoluteUrl) {
       const url = new URL(event.page.absoluteUrl)
+      console.log(url.searchParams.toString())
       setExploreQid(url.searchParams.get('qid'))
       setExploreToggle(url.searchParams.get('toggle'))
     }
