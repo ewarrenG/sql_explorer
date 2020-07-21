@@ -94,8 +94,9 @@ export function Main({route}: any) {
     if (c.lid) setLid(c.lid)
     if (c.toggle) setLid(c.toggle)
     if (c.selection) setSelection(c.selection)
-    history.push(selection + newSearchUrl(c))
+    history.push(c.selection + newSearchUrl(c))
   }
+
 
   const getQid = async () => {
     const { 
