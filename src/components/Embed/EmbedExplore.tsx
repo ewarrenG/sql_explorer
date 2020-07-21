@@ -70,7 +70,7 @@ export const EmbedExplore = () => {
         })
     }
   }, [qid_embed_path])
-
+  console.log({qid, selection})
   if (qid) {
     return (
       <>
