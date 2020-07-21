@@ -21,13 +21,15 @@ export function Main({route}: any) {
   const sdk = extensionContext.coreSDK;
   
   const { location } = history;
+  const pathname = history?.location?.pathname
+
   const app_search_params = getAppSearch(location.search)
   
   const [qid, setQid] = useState(app_search_params.qid)
   const [did, setDid] = useState(app_search_params.did)
   const [sql, setSql] = useState(app_search_params.sql)
   const [lid, setLid] = useState(app_search_params.lid)
-  const [selection, setSelection] = useState(history.location.pathname)
+  const [selection, setSelection] = useState((pathname && pathname.length > 2) ? pathname : ROUTES.EMBED_SQL)
   const [toggle, setToggle] = useState(app_search_params.toggle)
 
   const [editing, setEditing] = useState(undefined)
