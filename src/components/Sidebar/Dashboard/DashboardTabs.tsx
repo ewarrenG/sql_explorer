@@ -8,7 +8,7 @@ import { DashboardTabCreateDashboard } from './DashboardTabCreateDashboard';
 
 export const SEARCH_FIELDS = "id,title,description,user_id,folder"
 
-export function DashboardTabs( {turnDialogOff}: any) {
+export function DashboardTabs( {turnDialogOff, is_saving}: any) {
   const [all_dashboards, setAllDashboards] = useState()
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.core40SDK
@@ -71,6 +71,7 @@ export function DashboardTabs( {turnDialogOff}: any) {
           </TabPanel>
           <TabPanel>
             <DashboardTabCreateDashboard 
+              is_saving={is_saving}
               turnDialogOff={turnDialogOff}
             />
           </TabPanel>

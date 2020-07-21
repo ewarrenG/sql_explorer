@@ -95,7 +95,7 @@ export function SidebarSaves() {
 
         {!db_dialog_ready && <>
           <DialogContent>
-            <DashboardTabs turnDialogOff={() => { }} />
+            <DashboardTabs is_saving={true} turnDialogOff={() => { }} />
           </DialogContent>
         </>
         }
