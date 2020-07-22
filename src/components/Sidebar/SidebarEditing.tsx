@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
-import { Code, MenuItem, IconButton, Flex, ButtonTransparent } from '@looker/components';
+import { Code, MenuItem, IconButton, Flex, ButtonTransparent, Box, SpaceVertical } from '@looker/components';
 import styled from 'styled-components'
 import { ROUTES } from '../../App';
 import { SidebarContainer, SidebarHeading, SidebarBox, SidebarButton } from './SidebarComponents';
@@ -16,11 +16,11 @@ export function SidebarEditing() {
   const handleSave = async () => {
     const query = await sdk.ok(sdk.query_for_slug(qid))
     if (editing.lid) {
-      setAppParams({lid: undefined})
+      setAppParams({ lid: undefined })
       const update = await sdk.ok(sdk.update_look(editing.lid, {
         query_id: query.id
       }))
-      setAppParams({ 
+      setAppParams({
         selection: ROUTES.EMBED_LOOK,
         lid: editing.lid
       })
@@ -29,7 +29,7 @@ export function SidebarEditing() {
         query_id: query.id
       }))
       triggerRefreshDb();
-      setAppParams({ 
+      setAppParams({
         selection: ROUTES.EMBED_DASHBOARD,
         did: editing.did
       })
@@ -41,26 +41,34 @@ export function SidebarEditing() {
     triggerRefreshExplore()
     setEditing(undefined)
   }
- 
+
   return (
     <>
-      <MenuItem
+      <StyledMenuItem
         icon="EditOutline"
         selected={true}
       >
         Editor
-      </MenuItem>
-      <SidebarContainer>
-        <SidebarHeading>Options</SidebarHeading>
-        <SidebarBox>
-          <SidebarButton onClick={handleSave} children="Save Changes" />
-          <SidebarButton onClick={handleCancel} children="Discard Changes" />
-        </SidebarBox>
-      </SidebarContainer>
+      </StyledMenuItem>
+      <StyledBox pl="xlarge" mb="xsmall">
+        <SpaceVertical gap="xsmall">
+          <SidebarHeading>Options</SidebarHeading>
+          <SidebarBox>
+            <SidebarButton onClick={handleSave} children="Save Changes" />
+            <SidebarButton onClick={handleCancel} children="Discard Changes" />
+          </SidebarBox>
+        </SpaceVertical>
+      </StyledBox>
     </>
   );
 }
 
-const StyledCode = styled(Code)`
-  white-space: pre;
+const StyledMenuItem = styled(MenuItem)`
+background: #949dff26;
+&:hover { background: #949dff26; }
 `
+
+const StyledBox = styled(Box)`
+background: #949dff26;
+`
+

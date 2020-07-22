@@ -4,6 +4,7 @@ import { ActionListItemColumn, ActionListItem, ActionList, doDefaultActionListSo
 import AppContext from '../../../AppContext';
 import { filter } from 'lodash';
 import { exploreEmbedPath } from '../../../helpers';
+import { ROUTES } from '../../../App';
 
 const COLUMNS = [
 {
@@ -49,6 +50,7 @@ export function DashboardElementActionList({ turnDialogOff, all_elements }: any)
     })
     
     setAppParams({
+      selection: ROUTES.EMBED_EXPLORE,
       qid: query.client_id,
       sql: sql,
     })

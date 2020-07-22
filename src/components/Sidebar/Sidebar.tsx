@@ -57,12 +57,12 @@ export const Sidebar: React.FC<any> = ({ selection }) => {
           </StyledMenuItem>
       </StyledRouterLink>
       {(selection === ROUTES.EMBED_LOOK) && <SidebarLook /> }
+      { editing && <SidebarEditing /> }
       <StyledRouterLink onClick={()=>{updateSelection(ROUTES.HELP)}}>
         <StyledMenuItem icon="Help" current={selection === ROUTES.HELP}>
           Help
         </StyledMenuItem>
       </StyledRouterLink>
-      { editing && <SidebarEditing /> }
     </Box>
   )
 }
