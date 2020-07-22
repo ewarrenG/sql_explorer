@@ -15,7 +15,7 @@ export const EmbedDashboard: React.FC<EmbedProps> = () => {
   const [loading, setLoading] = React.useState(true)
   const [dashboard, setDashboard] = React.useState<LookerEmbedDashboard>()
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
-  const { did, dashboard_options, refresh_db } = useContext(AppContext)
+  const { did, dashboard_options, did_iframe_reload } = useContext(AppContext)
   const { dashboard_next } = dashboard_options
 
   const setupDashboard = (dashboard: LookerEmbedDashboard) => {
@@ -41,7 +41,7 @@ export const EmbedDashboard: React.FC<EmbedProps> = () => {
           console.error('Connection error', error)
         })
     }
-  }, [did, dashboard_next, refresh_db])
+  }, [did, dashboard_next, did_iframe_reload])
 
   if (did) {
     return (

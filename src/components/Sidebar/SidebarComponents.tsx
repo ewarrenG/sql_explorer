@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, Heading, ButtonTransparent, SpaceVertical, Text, FieldCheckbox, Flex, Checkbox, Space, MenuItem } from '@looker/components';
-import styled, { keyframes } from 'styled-components'
+import { Box, Heading, ButtonTransparent, SpaceVertical, Text, Flex, Checkbox, Space, MenuItem } from '@looker/components';
+import styled, { keyframes, css } from 'styled-components'
 
 export const SidebarButton = ({children, ...props}) => {
   return  <ButtonTransparent
@@ -132,10 +132,23 @@ const heartbeat = keyframes`
 `
 
 export const StyledMenuItem = styled(MenuItem)`
+
   &[aria-current='true'] {
     background: #949dff26;
-    -webkit-animation: ${heartbeat_webkit} 1.5s ease-in-out 2 both;
-    animation: ${heartbeat} 1.5s ease-in-out 2 both;
+  }
+  &[aria-current='false'] > button > div {  
+    ${(props=>{
+      const is_first_refresh = (props.re && props.re.split('::')[1] === '0')
+      const {is_last_selection} = props
+      if ( ! (is_first_refresh || is_last_selection) ) {
+        return css`    
+          -webkit-animation: ${heartbeat_webkit} 1.5s ease-in-out 2 both;
+          animation: ${heartbeat} 1.5s ease-in-out 2 both;
+        `
+      } else {
+        return css``
+      }
+    })}
   }
 `
 

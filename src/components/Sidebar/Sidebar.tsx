@@ -11,13 +11,34 @@ import { SidebarDashboard } from './Dashboard/SidebarDashboard'
 import { SidebarLook } from './Look/SidebarLook'
 import { SidebarEditing } from './SidebarEditing'
 import { StyledMenuItem } from './SidebarComponents'
+import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react'
+import { ExtensionHostApi } from '@looker/extension-sdk'
 
-export const Sidebar: React.FC<any> = ({ selection }) => {
-  const {qid, editing, setAppParams} = useContext(AppContext)
+export const Sidebar: React.FC<any> = ({ selection, last_selection, refresh_qid, refresh_did, refresh_sql, refresh_lid, resetSidebarNotification }) => {
+  const {editing, setAppParams} = useContext(AppContext)
+  const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
+  const extensionHost = extensionContext.extensionSDK as ExtensionHostApi
 
   const updateSelection = (route) => {
+    resetSidebarNotification(route)
+    extensionHost.track('click','sql-runner-tracked', {selection: route, editing})
     setAppParams({selection: route})
   }
+
+  const SidebarMenuItem: any = ({children, refresh, route, ...props}: any) => {
+    return <StyledMenuItem
+      {...props}
+      key={`${route}::${refresh}`}
+      re={`${route}::${refresh}`}
+      onClick={()=>{updateSelection(route)}}
+      current={selection === route}
+      is_last_selection={(last_selection===route)}
+    >
+      {children}
+    </StyledMenuItem>
+  }
+
+
   return (
     <Box 
       display="flex" 
@@ -29,57 +50,52 @@ export const Sidebar: React.FC<any> = ({ selection }) => {
         mb="small"
         fontSize="xlarge"
       >SQL Explorer</Heading>
-        <StyledMenuItem
-          onClick={()=>{updateSelection(ROUTES.EMBED_SQL)}}
+        <SidebarMenuItem
+          route={ROUTES.EMBED_SQL}
+          refresh={refresh_sql}
           icon="SqlRunner"
-          current={selection === ROUTES.EMBED_SQL}
-          selected={selection === ROUTES.EMBED_SQL}
         >
           Write SQL
-          </StyledMenuItem>
+          </SidebarMenuItem>
       {(selection === ROUTES.EMBED_SQL) && <SidebarSql /> }
-        <StyledMenuItem key={qid}
-          onClick={()=>{updateSelection(ROUTES.EMBED_EXPLORE)}}
-          icon="Explore" 
-          current={selection === ROUTES.EMBED_EXPLORE}
-        >
-          Explore SQL
-          </StyledMenuItem>
+        <SidebarMenuItem
+            route={ROUTES.EMBED_EXPLORE}
+            refresh={refresh_qid}
+            icon="Explore"
+          >
+            Explore SQL
+          </SidebarMenuItem>
       {(selection === ROUTES.EMBED_EXPLORE) && <SidebarExplore/> }
-        <StyledMenuItem 
-          onClick={()=>{updateSelection(ROUTES.EMBED_SQL)}}
-          icon="Dashboard" current={selection === ROUTES.EMBED_LOOK}>
-          View Dashboard
-          </StyledMenuItem>
+      <SidebarMenuItem
+            route={ROUTES.EMBED_DASHBOARD}
+            refresh={refresh_did}
+            icon="Dashboard"
+          >
+            View Dashboard
+          </SidebarMenuItem>
       {(selection === ROUTES.EMBED_DASHBOARD) && <SidebarDashboard /> }
-        <StyledMenuItem 
-          onClick={()=>{updateSelection(ROUTES.EMBED_LOOK)}}
-          icon="Reports" current={selection === ROUTES.EMBED_LOOK}>
-          View Look
-          </StyledMenuItem>
+      <SidebarMenuItem
+            route={ROUTES.EMBED_LOOK}
+            refresh={refresh_lid}
+            icon="Reports"
+          >
+            View Look
+          </SidebarMenuItem>
       {(selection === ROUTES.EMBED_LOOK) && <SidebarLook /> }
       { editing && <SidebarEditing /> }
-        <StyledMenuItem 
-          onClick={()=>{updateSelection(ROUTES.EMBED_LOOK)}}
-          icon="Help" current={selection === ROUTES.HELP}
-        >
-          Help
-        </StyledMenuItem>
+      <SidebarMenuItem
+            route={ROUTES.HELP}
+            refresh={0}
+            icon="Help"
+          >
+            Help
+          </SidebarMenuItem>
     </Box>
   )
 }
 
+
+
 const StyledRouterLinkInner: React.FC<LinkProps & StyledMenuItemProps> = (props) => (
   <RouterLink {...omit(props, 'customizationProps')} />
 )
-
-const StyledRouterLink = styled(StyledRouterLinkInner)`
-  text-decoration: none;
-  &:focus,
-  &:hover,
-  &:visited,
-  &:link,
-  &:active {
-    text-decoration: none;
-  }
-`

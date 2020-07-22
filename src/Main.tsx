@@ -31,6 +31,7 @@ export function Main() {
   const [sql, setSql] = useState(app_search_params.sql)
   const [lid, setLid] = useState(app_search_params.lid)
   const [selection, setSelection] = useState((pathname && pathname.length >= 2) ? pathname : ROUTES.EMBED_SQL)
+  const [last_selection, setLastSelection] = useState("");
   const [toggle, setToggle] = useState(app_search_params.toggle)
 
   const [editing, setEditing] = useState(undefined)
@@ -41,9 +42,12 @@ export function Main() {
   
   const [qid_embed_path, setQidEmbedPath] = useState((app_search_params.qid) ? exploreEmbedPath(app_search_params.qid, app_search_params.toggle || '') : '')
   
-  // const [refresh_explore, triggerRefreshExplore] = refresh(0)
-  const [refresh_db, triggerRefreshDb] = refresh(0)
-  
+  const [refresh_did, resetRefreshDid, triggerRefreshDid] = refresh(0)
+  const [refresh_qid, resetRefreshQid, triggerRefreshQid] = refresh(0)
+  const [refresh_lid, resetRefreshLid, triggerRefreshLid] = refresh(0)
+  const [refresh_sql, resetRefreshSql, triggerRefreshSql] = refresh(0)
+  const [lid_iframe_reload, resetLidIframeReload, triggerLidIframeReload] = refresh(0)
+  const [did_iframe_reload, resetDidIframeReload, triggerDidIframeReload] = refresh(0)
 
   const [sql_options, setSqlOptions] = useState({
     keep_vis: true,
@@ -78,7 +82,7 @@ export function Main() {
     if (did) {
       getDashboard();
     }
-  }, [did, refresh_db])
+  }, [did, refresh_did])
 
   useEffect(()=>{
     if (lid) {
@@ -86,14 +90,36 @@ export function Main() {
     }
   }, [lid])
 
+  const resetSidebarNotification = (route: string) => {
+    const {EMBED_LOOK, EMBED_SQL, EMBED_DASHBOARD, EMBED_EXPLORE} = ROUTES
+    switch (route) {
+      case EMBED_SQL:
+        resetRefreshSql();
+        break;
+      case EMBED_DASHBOARD:
+        resetRefreshDid();
+        break;
+      case EMBED_LOOK:
+        resetRefreshLid();
+        break;
+      case EMBED_EXPLORE:
+        resetRefreshQid();
+        break;
+    }
+  }
+
   const setAppParams = (push_object: any) => {
     let c = {...push_object}
-    if (c.sql) {setSql(c.sql)}
-    if (c.qid) {setQid(c.qid)}
-    if (c.did) {setDid(c.did)}
-    if (c.lid) {setLid(c.lid)}
-    if (c.toggle) {setToggle(c.toggle)}
-    if (c.selection) {setSelection(c.selection)}
+    if (c.sql) { setSql(c.sql); triggerRefreshSql(); }
+    if (c.qid) { setQid(c.qid); triggerRefreshQid(); }
+    if (c.did) { setDid(c.did); triggerRefreshDid(); }
+    if (c.lid) { setLid(c.lid); triggerRefreshLid(); }
+    if (c.toggle) { setToggle(c.toggle) }
+    if (c.selection) { 
+      resetSidebarNotification(c.selection)
+      setSelection(c.selection); 
+      setLastSelection(selection) 
+    }
   }
 
   useEffect(()=>{
@@ -179,11 +205,11 @@ export function Main() {
     sql, qid, did, lid, toggle,
     setAppParams,
     sql_embed_path, setSqlEmbedPath,
-
     qid_embed_path, setQidEmbedPath,
-    // refresh_explore, triggerRefreshExplore,
-
-    refresh_db, triggerRefreshDb,
+    refresh_lid, triggerRefreshLid,
+    did_iframe_reload, triggerDidIframeReload,
+    triggerRefreshDid,
+    triggerLidIframeReload,
     sql_options, setSqlOptions,
     dashboard_options, setDashboardOptions,
     user, session,
@@ -198,7 +224,7 @@ export function Main() {
       value={context}
     >
       <Layout>
-        <Sidebar selection={selection} />
+        <Sidebar {...{selection, last_selection, refresh_qid, refresh_did, refresh_sql, refresh_lid, resetSidebarNotification}} />
         <Box >
           <Switch>
             <Route path={"/:selection"}>
@@ -212,7 +238,9 @@ export function Main() {
                 <EmbedDashboard />
               </StyledBox>
               <StyledBox show={(selection === ROUTES.EMBED_LOOK)}>
-                <EmbedLookUnSandbox />
+                <EmbedLookUnSandbox 
+                  key={`/lid::${lid_iframe_reload}`}
+                />
               </StyledBox>
               <StyledBox show={(selection === ROUTES.HELP)}>
                 <>Help!</>

@@ -24,9 +24,12 @@ export const EmbedExplore = () => {
 
   useEffect(()=>{
     let obj = {}
-    if (explore_qid && explore_qid.length) { obj['qid'] = explore_qid }
+    if (explore_qid && explore_qid.length && qid !== explore_qid ) { obj['qid'] = explore_qid }
     if (explore_toggle && explore_toggle.length) { obj['toggle'] = explore_toggle }
-    setAppParams(obj)
+    if ( obj !== {}) {
+      setAppParams(obj)
+    }
+    
   }, [explore_qid, explore_toggle])
 
   const setupExplore = (explore: LookerEmbedExplore) => {

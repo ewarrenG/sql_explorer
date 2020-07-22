@@ -4,6 +4,7 @@ import { Code, ActionListItemColumn, ActionListItem, ActionList, doDefaultAction
 import AppContext from '../../../AppContext';
 import { filter, sortBy } from 'lodash';
 import { SEARCH_FIELDS } from './DashboardTabs';
+import { ROUTES } from '../../../App';
 
 const COLUMNS = [
   {
@@ -43,7 +44,7 @@ export function DashboardActionList({ type, turnDialogOff, all_dashboards }: any
   const [dashboards, setDashboards] = useState( all_dashboards || []);
   const [columns, setColumns] = useState(COLUMNS);
   const [loading, setLoading] = useState(true);
-  const { user, setAppParams } = useContext(AppContext)
+  const { user, setAppParams, triggerDidIframeReload, selection } = useContext(AppContext)
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.core40SDK
 
@@ -126,6 +127,9 @@ export function DashboardActionList({ type, turnDialogOff, all_dashboards }: any
           key={id}
           onClick={() => {
             setAppParams({did: id});
+            if ( selection !== ROUTES.EMBED_DASHBOARD) {
+              triggerDidIframeReload()
+            }
             turnDialogOff();  
           }}
         >

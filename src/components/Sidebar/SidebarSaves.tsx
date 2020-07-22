@@ -19,7 +19,7 @@ export function SidebarSaves() {
   const [look_title, setLookTitle] = useState('')
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.coreSDK
-  const { did, qid, dashboard, search, setDashboard, triggerRefreshDb, refresh_db, setAppParams } = useContext(AppContext)
+  const { did, qid, dashboard, search, setDashboard, triggerDidIframeReload, refresh_did, setAppParams } = useContext(AppContext)
   
 
   const handleDbSubmit = async () => {
@@ -33,10 +33,10 @@ export function SidebarSaves() {
     }
     const element = await sdk.ok(sdk.create_dashboard_element(body))
     const db = await sdk.ok(sdk.dashboard(did))
-    setDashboard(db)
-    setDbOpen(false)
-    triggerRefreshDb(refresh_db + 1)
-    setSaving(false)
+    setDashboard(db);
+    setDbOpen(false);
+    triggerDidIframeReload();
+    setSaving(false);
     
     setAppParams({selection: ROUTES.EMBED_DASHBOARD})
   }
