@@ -13,7 +13,7 @@ import { SidebarEditing } from './SidebarEditing'
 import { StyledMenuItem } from './SidebarComponents'
 
 export const Sidebar: React.FC<any> = ({ selection }) => {
-  const {search, editing, setAppParams} = useContext(AppContext)
+  const {qid, editing, setAppParams} = useContext(AppContext)
 
   const updateSelection = (route) => {
     setAppParams({selection: route})
@@ -30,6 +30,7 @@ export const Sidebar: React.FC<any> = ({ selection }) => {
         fontSize="xlarge"
       >SQL Explorer</Heading>
         <StyledMenuItem
+          onClick={()=>{updateSelection(ROUTES.EMBED_SQL)}}
           icon="SqlRunner"
           current={selection === ROUTES.EMBED_SQL}
           selected={selection === ROUTES.EMBED_SQL}
@@ -37,20 +38,31 @@ export const Sidebar: React.FC<any> = ({ selection }) => {
           Write SQL
           </StyledMenuItem>
       {(selection === ROUTES.EMBED_SQL) && <SidebarSql /> }
-        <StyledMenuItem icon="Explore" current={selection === ROUTES.EMBED_EXPLORE}>
+        <StyledMenuItem key={qid}
+          onClick={()=>{updateSelection(ROUTES.EMBED_EXPLORE)}}
+          icon="Explore" 
+          current={selection === ROUTES.EMBED_EXPLORE}
+        >
           Explore SQL
           </StyledMenuItem>
       {(selection === ROUTES.EMBED_EXPLORE) && <SidebarExplore/> }
-        <StyledMenuItem icon="Dashboard" current={selection === ROUTES.EMBED_DASHBOARD}>
+        <StyledMenuItem 
+          onClick={()=>{updateSelection(ROUTES.EMBED_SQL)}}
+          icon="Dashboard" current={selection === ROUTES.EMBED_LOOK}>
           View Dashboard
           </StyledMenuItem>
       {(selection === ROUTES.EMBED_DASHBOARD) && <SidebarDashboard /> }
-        <StyledMenuItem icon="Reports" current={selection === ROUTES.EMBED_LOOK}>
+        <StyledMenuItem 
+          onClick={()=>{updateSelection(ROUTES.EMBED_LOOK)}}
+          icon="Reports" current={selection === ROUTES.EMBED_LOOK}>
           View Look
           </StyledMenuItem>
       {(selection === ROUTES.EMBED_LOOK) && <SidebarLook /> }
       { editing && <SidebarEditing /> }
-        <StyledMenuItem icon="Help" current={selection === ROUTES.HELP}>
+        <StyledMenuItem 
+          onClick={()=>{updateSelection(ROUTES.EMBED_LOOK)}}
+          icon="Help" current={selection === ROUTES.HELP}
+        >
           Help
         </StyledMenuItem>
     </Box>

@@ -26,7 +26,6 @@ export const EmbedExplore = () => {
     let obj = {}
     if (explore_qid && explore_qid.length) { obj['qid'] = explore_qid }
     if (explore_toggle && explore_toggle.length) { obj['toggle'] = explore_toggle }
-    console.log(obj)
     setAppParams(obj)
   }, [explore_qid, explore_toggle])
 
@@ -52,7 +51,6 @@ export const EmbedExplore = () => {
 
   const handlePageChange = (event) => {
     if (event?.page?.absoluteUrl) {
-      console.log(event.page.absoluteUrl)
       const url = new URL(event.page.absoluteUrl)
       const q= url.searchParams.get('qid')
       const t=url.searchParams.get('toggle')
@@ -65,7 +63,7 @@ export const EmbedExplore = () => {
     const hostUrl = extensionContext?.extensionSDK?.lookerHostData?.hostUrl
     if (el && hostUrl && qid) {
       setLoading(true)
-      
+
       let obj: any = {}; 
       if (qid) obj['qid'] = qid
       obj['toggle'] = (toggle) ? toggle : ''

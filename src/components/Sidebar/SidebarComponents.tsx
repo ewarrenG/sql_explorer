@@ -130,11 +130,12 @@ const heartbeat = keyframes`
   }
 }
 `
-// -webkit-animation: ${heartbeat_webkit} 1.5s ease-in-out 2 both;
-// animation: ${heartbeat} 1.5s ease-in-out 2 both;
+
 export const StyledMenuItem = styled(MenuItem)`
   &[aria-current='true'] {
     background: #949dff26;
+    -webkit-animation: ${heartbeat_webkit} 1.5s ease-in-out 2 both;
+    animation: ${heartbeat} 1.5s ease-in-out 2 both;
   }
 `
 

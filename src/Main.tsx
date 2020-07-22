@@ -87,9 +87,7 @@ export function Main() {
   }, [lid])
 
   const setAppParams = (push_object: any) => {
-    // console.log(JSON.stringify(push_object))
     let c = {...push_object}
-    // console.log(JSON.stringify(c))
     if (c.sql) {setSql(c.sql)}
     if (c.qid) {setQid(c.qid)}
     if (c.did) {setDid(c.did)}
@@ -100,9 +98,7 @@ export function Main() {
 
   useEffect(()=>{
     let c = {sql, qid, lid, did, selection, toggle}
-    // console.log(JSON.stringify(c))
     const new_push = selection  + newSearchUrl({sql,did,toggle,lid,qid})
-    console.log(new_push)
     history.push(new_push)
   },[sql,did,toggle,selection,lid,qid])
 

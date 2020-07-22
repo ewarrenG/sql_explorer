@@ -34,8 +34,6 @@ export const getAppSearch = (search: string) => {
 }
 
 export const newSearchUrl = (search_obj: any) => {
-
-  console.log(appSearchPick(search_obj))
   const obj = new URLSearchParams(appSearchPick(search_obj))
   return '?' + obj.toString()
 }
