@@ -10,7 +10,7 @@ export const appSearchPick = (app_obj) => {
   if (!app_obj) { return {} }
   let out: any = {}
   app_search_params.forEach(a => {
-    if (app_obj[a]) {
+    if (app_obj[a] && app_obj[a].length) {
       out[a] = app_obj[a]
     }
   })
@@ -34,8 +34,9 @@ export const getAppSearch = (search: string) => {
 }
 
 export const newSearchUrl = (search_obj: any) => {
+
+  console.log(appSearchPick(search_obj))
   const obj = new URLSearchParams(appSearchPick(search_obj))
-  console.log({obj, string: obj.toString()})
   return '?' + obj.toString()
 }
 

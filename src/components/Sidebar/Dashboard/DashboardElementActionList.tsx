@@ -54,7 +54,7 @@ export function DashboardElementActionList({ turnDialogOff, all_elements }: any)
       qid: query.client_id,
       sql: sql,
     })
-    setQidEmbedPath(exploreEmbedPath(query.client_id, toggle))
+    setQidEmbedPath(exploreEmbedPath(query.client_id,'vis'))
     setSqlEmbedPath("/"+sql)
   }
 

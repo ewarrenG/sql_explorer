@@ -41,7 +41,7 @@ export function Main() {
   
   const [qid_embed_path, setQidEmbedPath] = useState((app_search_params.qid) ? exploreEmbedPath(app_search_params.qid, app_search_params.toggle || '') : '')
   
-  const [refresh_explore, triggerRefreshExplore] = refresh(0)
+  // const [refresh_explore, triggerRefreshExplore] = refresh(0)
   const [refresh_db, triggerRefreshDb] = refresh(0)
   
 
@@ -87,7 +87,9 @@ export function Main() {
   }, [lid])
 
   const setAppParams = (push_object: any) => {
-    let c = {sql, qid, lid, did, selection, toggle, ...push_object}
+    // console.log(JSON.stringify(push_object))
+    let c = {...push_object}
+    // console.log(JSON.stringify(c))
     if (c.sql) {setSql(c.sql)}
     if (c.qid) {setQid(c.qid)}
     if (c.did) {setDid(c.did)}
@@ -98,8 +100,9 @@ export function Main() {
 
   useEffect(()=>{
     let c = {sql, qid, lid, did, selection, toggle}
-    console.log(c)
+    // console.log(JSON.stringify(c))
     const new_push = selection  + newSearchUrl({sql,did,toggle,lid,qid})
+    console.log(new_push)
     history.push(new_push)
   },[sql,did,toggle,selection,lid,qid])
 
@@ -179,11 +182,10 @@ export function Main() {
     selection, 
     sql, qid, did, lid, toggle,
     setAppParams,
-    search: newSearchUrl({qid,did,sql,lid,toggle}),
     sql_embed_path, setSqlEmbedPath,
 
     qid_embed_path, setQidEmbedPath,
-    refresh_explore, triggerRefreshExplore,
+    // refresh_explore, triggerRefreshExplore,
 
     refresh_db, triggerRefreshDb,
     sql_options, setSqlOptions,

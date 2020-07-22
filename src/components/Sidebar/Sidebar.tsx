@@ -29,7 +29,6 @@ export const Sidebar: React.FC<any> = ({ selection }) => {
         mb="small"
         fontSize="xlarge"
       >SQL Explorer</Heading>
-      <StyledRouterLink onClick={()=>{updateSelection(ROUTES.EMBED_SQL)}}>
         <StyledMenuItem
           icon="SqlRunner"
           current={selection === ROUTES.EMBED_SQL}
@@ -37,32 +36,23 @@ export const Sidebar: React.FC<any> = ({ selection }) => {
         >
           Write SQL
           </StyledMenuItem>
-      </StyledRouterLink>
       {(selection === ROUTES.EMBED_SQL) && <SidebarSql /> }
-      <StyledRouterLink onClick={()=>{updateSelection(ROUTES.EMBED_EXPLORE)}}>
         <StyledMenuItem icon="Explore" current={selection === ROUTES.EMBED_EXPLORE}>
           Explore SQL
           </StyledMenuItem>
-      </StyledRouterLink>
       {(selection === ROUTES.EMBED_EXPLORE) && <SidebarExplore/> }
-      <StyledRouterLink onClick={()=>{updateSelection(ROUTES.EMBED_DASHBOARD)}}>
         <StyledMenuItem icon="Dashboard" current={selection === ROUTES.EMBED_DASHBOARD}>
           View Dashboard
           </StyledMenuItem>
-      </StyledRouterLink>
       {(selection === ROUTES.EMBED_DASHBOARD) && <SidebarDashboard /> }
-      <StyledRouterLink onClick={()=>{updateSelection(ROUTES.EMBED_LOOK)}}>
         <StyledMenuItem icon="Reports" current={selection === ROUTES.EMBED_LOOK}>
           View Look
           </StyledMenuItem>
-      </StyledRouterLink>
       {(selection === ROUTES.EMBED_LOOK) && <SidebarLook /> }
       { editing && <SidebarEditing /> }
-      <StyledRouterLink onClick={()=>{updateSelection(ROUTES.HELP)}}>
         <StyledMenuItem icon="Help" current={selection === ROUTES.HELP}>
           Help
         </StyledMenuItem>
-      </StyledRouterLink>
     </Box>
   )
 }

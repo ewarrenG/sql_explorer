@@ -18,7 +18,6 @@ export const App: React.FC<any> = hot(() => {
   const [routeState, setRouteState] = useState()
 
   const onRouteChange = (route: string, routeState?: any) => {
-    console.log({route, routeState})
     setRoute(route)
     setRouteState(routeState)
   }

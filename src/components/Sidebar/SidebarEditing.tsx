@@ -11,7 +11,7 @@ export function SidebarEditing() {
 
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.coreSDK
-  const { qid, toggle, editing, setEditing, triggerRefreshDb, triggerRefreshExplore, setAppParams } = useContext(AppContext)
+  const { qid, toggle, editing, setEditing, triggerRefreshDb, setAppParams } = useContext(AppContext)
 
   const handleSave = async () => {
     const query = await sdk.ok(sdk.query_for_slug(qid))
@@ -38,7 +38,6 @@ export function SidebarEditing() {
   }
 
   const handleCancel = async () => {
-    triggerRefreshExplore()
     setEditing(undefined)
   }
 

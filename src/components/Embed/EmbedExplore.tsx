@@ -24,8 +24,9 @@ export const EmbedExplore = () => {
 
   useEffect(()=>{
     let obj = {}
-    if (explore_qid) { obj['qid'] = explore_qid }
-    if (explore_toggle) { obj['toggle'] = explore_toggle }
+    if (explore_qid && explore_qid.length) { obj['qid'] = explore_qid }
+    if (explore_toggle && explore_toggle.length) { obj['toggle'] = explore_toggle }
+    console.log(obj)
     setAppParams(obj)
   }, [explore_qid, explore_toggle])
 
@@ -51,10 +52,12 @@ export const EmbedExplore = () => {
 
   const handlePageChange = (event) => {
     if (event?.page?.absoluteUrl) {
+      console.log(event.page.absoluteUrl)
       const url = new URL(event.page.absoluteUrl)
-      console.log(url.searchParams.toString())
-      setExploreQid(url.searchParams.get('qid'))
-      setExploreToggle(url.searchParams.get('toggle'))
+      const q= url.searchParams.get('qid')
+      const t=url.searchParams.get('toggle')
+      if (q && q.length) {setExploreQid(q)}
+      if (t && t.length) {setExploreToggle(t)}
     }
   }
 
@@ -62,11 +65,16 @@ export const EmbedExplore = () => {
     const hostUrl = extensionContext?.extensionSDK?.lookerHostData?.hostUrl
     if (el && hostUrl && qid) {
       setLoading(true)
+      
+      let obj: any = {}; 
+      if (qid) obj['qid'] = qid
+      obj['toggle'] = (toggle) ? toggle : ''
+      
       el.innerHTML = ''
       LookerEmbedSDK.init(hostUrl)
       LookerEmbedSDK.createExploreWithId(`sql__${sql}/sql_runner_query`)
         .withClassName('looker-explore')
-        .withParams({ qid, toggle })
+        .withParams(obj)
         .appendTo(el)
         .on('explore:ready', () => { setLoading(false) })
         .on('page:changed', handlePageChange)
