@@ -14,6 +14,7 @@ import { ROUTES } from './App';
 import { EmbedLookUnSandbox } from './components/Embed/EmbedLookUnSandbox';
 import refresh from './MainRefresh';
 import { sortBy, filter } from 'lodash';
+import { TourWrapper } from './components/Tour/ReactTour';
 
 
 export const LOOK_SEARCH_FIELDS = "id,title,description,user_id,folder,model"
@@ -324,6 +325,7 @@ export function Main() {
           </Switch>
         </Box>
       </Layout>
+      <TourWrapper/>
     </AppContext.Provider>
   );
 }
