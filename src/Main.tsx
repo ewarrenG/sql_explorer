@@ -103,23 +103,37 @@ export function Main() {
         resetRefreshLid();
         break;
       case EMBED_EXPLORE:
+        console.log('hi')
         resetRefreshQid();
         break;
     }
   }
 
   const setAppParams = (push_object: any) => {
+    const { EMBED_LOOK, EMBED_DASHBOARD, EMBED_SQL, EMBED_EXPLORE } = ROUTES
     let c = {...push_object}
-    if (c.sql) { setSql(c.sql); triggerRefreshSql(); }
-    if (c.qid) { setQid(c.qid); triggerRefreshQid(); }
-    if (c.did) { setDid(c.did); triggerRefreshDid(); }
-    if (c.lid) { setLid(c.lid); triggerRefreshLid(); }
+    if (c.sql) { 
+      setSql(c.sql);
+    }
+    if (c.qid) { 
+      setQid(c.qid); 
+    }
+    if (c.did) { 
+      setDid(c.did); 
+    }
+    if (c.lid) { 
+      setLid(c.lid); 
+    }
     if (c.toggle) { setToggle(c.toggle) }
     if (c.selection) { 
       resetSidebarNotification(c.selection)
       setSelection(c.selection); 
       setLastSelection(selection) 
-    }
+    } 
+    if (c.qid && selection !== EMBED_EXPLORE) { triggerRefreshQid(); }
+    if (c.sql && selection !== EMBED_SQL) { triggerRefreshSql(); }
+    if (c.lid && selection !== EMBED_LOOK ) { triggerRefreshLid(); }
+    if (c.did && selection !== EMBED_DASHBOARD ) { triggerRefreshDid(); }
   }
 
   useEffect(()=>{
@@ -176,7 +190,7 @@ export function Main() {
     }
     
     const q = await sdk.ok(sdk.create_query(nqb,'client_id'))
-    setQid(q.client_id)
+    setAppParams({qid: q.client_id})
     setQidEmbedPath(exploreEmbedPath(q.client_id!, toggle || ''))
   }
 

@@ -5,7 +5,6 @@ import AppContext from '../../../AppContext';
 import { SidebarContainer, SidebarHeading, SidebarBox, SidebarButton } from '../SidebarComponents';
 import { SidebarGroupLook } from './SidebarGroupLook';
 import { exploreEmbedPath } from '../../../helpers';
-import { useHistory } from 'react-router-dom';
 import { ROUTES } from '../../../App';
 
 export function SidebarLook() {

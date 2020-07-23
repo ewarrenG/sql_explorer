@@ -1,5 +1,5 @@
 import { Box, StyledMenuItemProps, Heading, MenuList, Icon } from '@looker/components'
-import  React, { useContext } from 'react'
+import  React, { useContext, useEffect, useState } from 'react'
 import { Link as RouterLink, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
 import omit from 'lodash/omit'
@@ -26,13 +26,32 @@ export const Sidebar: React.FC<any> = ({ selection, last_selection, refresh_qid,
   }
 
   const SidebarMenuItem: any = ({children, refresh, route, ...props}: any) => {
+    const [start, setStart] = useState(false)
+
+    useEffect(() => {
+      if (refresh > 0) { 
+        setStart(true) 
+      }
+    }, [refresh])
+    
+    useEffect(()=>{
+      if (start) {
+        const timer = setTimeout(() => { 
+          resetSidebarNotification(route)
+          setStart(false)
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
+    }, [start])
+
+    console.log({route, refresh, start})
+
     return <StyledMenuItem
       {...props}
       key={`${route}::${refresh}`}
-      re={`${route}::${refresh}`}
+      animate={(start)? true : false}
       onClick={()=>{updateSelection(route)}}
       current={selection === route}
-      is_last_selection={(last_selection===route)}
     >
       {children}
     </StyledMenuItem>

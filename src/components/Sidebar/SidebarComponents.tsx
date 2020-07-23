@@ -138,17 +138,15 @@ export const StyledMenuItem = styled(MenuItem)`
   }
   &[aria-current='false'] > button > div {  
     ${(props=>{
-      const is_first_refresh = (props.re && props.re.split('::')[1] === '0')
-      const {is_last_selection} = props
-      if ( ! (is_first_refresh || is_last_selection) ) {
-        return css`    
-          -webkit-animation: ${heartbeat_webkit} 1.5s ease-in-out 2 both;
-          animation: ${heartbeat} 1.5s ease-in-out 2 both;
-        `
-      } else {
-        return css``
-      }
-    })}
+        if ( props.animate ) {
+          console.log('hello')
+          return css`    
+            -webkit-animation: ${heartbeat_webkit} 1.5s ease-in-out 2 both;
+            animation: ${heartbeat} 1.5s ease-in-out 2 both;
+          `
+        } else {
+          return css``
+        }
+      })}
   }
 `
-
