@@ -38,24 +38,28 @@ const COLUMNS = [
   }
 ]
 
-export function LookActionList({ type, turnDialogOff, all_looks }: any) {
+export function LookActionList({ type, turnDialogOff }: any) {
+  const { all_looks, all_favorites} = useContext(AppContext)
   const [keywords, setKeywords] = useState('')
-  const [looks, setLooks] = useState( all_looks || []);
+  const [looks, setLooks] = useState([]);
   const [columns, setColumns] = useState(COLUMNS);
   const [loading, setLoading] = useState(true);
   const { user, setAppParams } = useContext(AppContext)
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.core40SDK
 
+
   useEffect(()=>{
     if (type === 'favorites') {
-      getFavorites();
+      setLooks(all_favorites?.looks)
+      setLoading(false)
     } else if ( type === 'recently_viewed') {
       getRecentlyViewed();
     } else {
+      setLooks(all_looks)
       setLoading(false)
     }
-  },[])
+  },[all_looks, all_favorites])
 
   const getRecentlyViewed = async () => {
     // last_viewed_at=not null&sorts=last_viewed_at desc&limit=11&fields=title,id
@@ -67,25 +71,6 @@ export function LookActionList({ type, turnDialogOff, all_looks }: any) {
       fields: SEARCH_FIELDS
     }))
     setLooks(sortBy(lk_list, ['title','id'])) 
-    setLoading(false)
-  } 
-
-  const getFavorites = async () => {
-    const favorites = await sdk.ok(sdk.search_content_favorites({
-      user_id: user.id,
-      fields: 'look_id'
-    }))
-    const lks = filter(favorites, function(c){ return c.look_id })
-    if (lks.length) {
-      const lk_list = await sdk.ok(sdk.search_looks({
-        id: lks.map(d=>{return String(d.look_id)}).join(','),
-        fields: SEARCH_FIELDS
-      }))
-      setLooks(sortBy(lk_list, ['title','id']))
-    } else {
-      setLooks([])
-    }
-
     setLoading(false)
   } 
 

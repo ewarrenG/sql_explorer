@@ -10,7 +10,7 @@ export function DashboardTabCreateDashboard( {turnDialogOff, is_saving}: any) {
   const [saving, setSaving] = useState(false)
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.coreSDK
-  const {setAppParams} = useContext(AppContext)
+  const {setAppParams, runRefreshes} = useContext(AppContext)
   
 
   const handleDashboardSubmit = async (folder_id: string) => {
@@ -27,6 +27,7 @@ export function DashboardTabCreateDashboard( {turnDialogOff, is_saving}: any) {
     setAppParams(params)
     turnDialogOff()
     setSaving(false)
+    runRefreshes();
   }
 
   return (

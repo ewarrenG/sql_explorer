@@ -19,7 +19,7 @@ export function SidebarSaves() {
   const [look_title, setLookTitle] = useState('')
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.coreSDK
-  const { did, qid, dashboard, search, setDashboard, triggerDidIframeReload, refresh_did, setAppParams } = useContext(AppContext)
+  const { did, qid, dashboard, setDashboard, triggerDidIframeReload, runRefreshes, setAppParams } = useContext(AppContext)
   
 
   const handleDbSubmit = async () => {
@@ -37,8 +37,8 @@ export function SidebarSaves() {
     setDbOpen(false);
     triggerDidIframeReload();
     setSaving(false);
-    
     setAppParams({selection: ROUTES.EMBED_DASHBOARD})
+    runRefreshes();
   }
 
   const handleLookSubmit = async (folder_id: string) => {
@@ -52,6 +52,7 @@ export function SidebarSaves() {
     setAppParams({selection: ROUTES.EMBED_LOOK, lid: look.id})
     setLookOpen(false)
     setSaving(false)
+    runRefreshes();
   }
 
   const db_dialog_ready = (did && dashboard && dashboard.title)
@@ -113,9 +114,6 @@ export function SidebarSaves() {
           saving,
           handleLookSubmit
         }}/>
-
-        
-        
       </Dialog>
     </>
   );

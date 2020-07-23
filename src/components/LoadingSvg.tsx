@@ -1,11 +1,12 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components'
+import { Box } from '@looker/components';
 
-export function LoadingSvg ({toggle_loading}) {
+export function LoadingSvg ({toggle_loading, ...props}) {
   if (toggle_loading) {
     return (
       <>
-        <StyledDiv>
+        <StyledDiv {...props}>
           <svg id="lookerbubbles" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 123.4 192" fill="#C1C6CC" style={{height: "auto", maxHeight: "192px", maxWidth: "192px", width: "50%"}}>
             <path className="circle1" d="M42.4 17.8c-3.8 0-7-3.1-7-7s3.1-7 7-7c3.8 0 7 3.1 7 7 0 1-0.2 1.9-0.6 2.8l3.2 3c1-1.7 1.6-3.7 1.6-5.7C53.4 4.8 48.4-0.1 42.2 0s-11 5.2-10.9 11.3c0.1 6.1 5.1 10.9 11.1 10.9 2.2 0 4.3-0.7 6.1-1.9l-3.3-3.1c-0.9 0.4-1.9 0.6-2.8 0.6"></path>
             <path className="circle2" d="M67.9 16.5c-4.3 0-8.4 1.5-11.6 4.3l5.2 4.9c5.2-3.6 12.3-2.4 15.9 2.8 3.6 5.2 2.4 12.3-2.8 15.9 -3.8 2.6-8.8 2.8-12.6 0.3l-5 5.1c3.1 2.5 7 3.9 11 3.9 10.2-0.4 18.2-9 17.9-19.2C85.4 24.6 77.6 16.8 67.9 16.5"></path>
@@ -40,7 +41,7 @@ const fade2 = keyframes`
 }
 `
 
-const StyledDiv = styled.div`
+const StyledDiv = styled(Box)`
   animation: 0s ease-in 0s 1 normal none running ${fade1};
   -webkit-box-align: center;
   align-items: center;

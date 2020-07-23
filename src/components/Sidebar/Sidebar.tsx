@@ -44,8 +44,6 @@ export const Sidebar: React.FC<any> = ({ selection, last_selection, refresh_qid,
       }
     }, [start])
 
-    console.log({route, refresh, start})
-
     return <StyledMenuItem
       {...props}
       key={`${route}::${refresh}`}

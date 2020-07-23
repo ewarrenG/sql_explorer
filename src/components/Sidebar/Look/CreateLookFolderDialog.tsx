@@ -41,7 +41,6 @@ export function CreateLookFolderDialog({ look_title, setLookTitle, saving, handl
   const { user } = useContext(AppContext)
   const { personal_folder_id } = user
   const [columns, setColumns] = useState(COLUMNS)
-  const [can_edit, setCanEdit] = useState(false)
   const [data, setData] = useState<any>([])
   const [looks, setLooks] = useState<any>([])
   const [bread_crumbs, setBreadCrumbs] = useState<any>([{ id: '0', name: '...Top', edit_content: false }]);

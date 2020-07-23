@@ -13,12 +13,18 @@ import { Sidebar } from './components/Sidebar/Sidebar'
 import { ROUTES } from './App';
 import { EmbedLookUnSandbox } from './components/Embed/EmbedLookUnSandbox';
 import refresh from './MainRefresh';
+import { sortBy, filter } from 'lodash';
+
+
+export const LOOK_SEARCH_FIELDS = "id,title,description,user_id,folder,model"
+export const DASHBOARD_SEARCH_FIELDS = "id,title,description,user_id,folder"
+
 
 export function Main() {
   let history = useHistory();
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext);
   const hostUrl = extensionContext?.extensionSDK?.lookerHostData?.hostUrl;
-  const sdk = extensionContext.coreSDK;
+  const sdk = extensionContext.core40SDK;
   
   const { location } = history;
   const pathname = history?.location?.pathname
@@ -35,8 +41,12 @@ export function Main() {
   const [toggle, setToggle] = useState(app_search_params.toggle)
 
   const [editing, setEditing] = useState(undefined)
-  const [dashboard, setDashboard] = useState()
-  const [look, setLook] = useState()
+  const [dashboard, setDashboard] = useState();
+  const [look, setLook] = useState();
+
+  const [all_dashboards, setAllDashboards] = useState([]);
+  const [all_looks, setAllLooks] = useState([]);
+  const [all_favorites, setAllFavorites] = useState<any>();
 
   const [sql_embed_path, setSqlEmbedPath] = useState((app_search_params.sql) ? `/${sql}` : '')
   
@@ -61,15 +71,21 @@ export function Main() {
   })
 
   const [session, setSession] = useState<IApiSession>()
-  const [user, setUser] = useState()
+  const [user, setUser] = useState<any>()
 
   useEffect(() => {
     getSessions();
     getUser();
   }, [])
 
+  useEffect(() => {
+    if ( user ) {
+      runRefreshes();
+    }
+  }, [user])
+
   useEffect(()=>{
-      getQid();
+    getQid();
   }, [sql])
 
   useEffect(()=>{
@@ -199,6 +215,49 @@ export function Main() {
     setLook(l)
   }
 
+  const runRefreshes = () => {
+    getAllDashboards();
+    getAllLooks();
+    getAllFavorites();
+  }
+
+  const getAllDashboards = async () => {
+    const all_dbs = await sdk.ok(sdk.all_dashboards(DASHBOARD_SEARCH_FIELDS))
+    const no_lookml_dbs = filter(all_dbs, o=>o.folder.name!=='LookML Dashboards')
+    setAllDashboards(sortBy(no_lookml_dbs, ['title','id']))
+  }
+
+  const getAllLooks = async () => {
+    const all_lks = await sdk.ok(sdk.all_looks(LOOK_SEARCH_FIELDS))
+    setAllLooks(sortBy(all_lks, ['title','id']))
+  }
+
+  const getAllFavorites = async () => {
+    const favorites = await sdk.ok(sdk.search_content_favorites({
+      user_id: user!.id,
+      fields: 'dashboard_id,look_id'
+    }))
+    const dbs = filter(favorites, function(c){ return c.dashboard_id })
+    const lks = filter(favorites, function(c){ return c.look_id })
+    let db_list: any = []
+    let lk_list: any = []
+
+    if (dbs.length) {
+      db_list = await sdk.ok(sdk.search_dashboards({
+        id: dbs.map(d=>{return String(d.dashboard_id!)}).join(','),
+        fields: DASHBOARD_SEARCH_FIELDS
+      }))
+    } 
+
+    if (lks.length) {
+      lk_list = await sdk.ok(sdk.search_looks({
+        id: lks.map(l=>{ return String(l.look_id)}).join(','),
+        fields: LOOK_SEARCH_FIELDS
+      }))
+    }
+    setAllFavorites({dashboards: db_list, looks: lk_list})
+  } 
+
   const getDashboard = async () => {
     const db = await sdk.ok(sdk.dashboard(did))
     setDashboard(db)
@@ -218,6 +277,7 @@ export function Main() {
     selection, 
     sql, qid, did, lid, toggle,
     setAppParams,
+    runRefreshes,
     sql_embed_path, setSqlEmbedPath,
     qid_embed_path, setQidEmbedPath,
     refresh_lid, triggerRefreshLid,
@@ -227,8 +287,8 @@ export function Main() {
     sql_options, setSqlOptions,
     dashboard_options, setDashboardOptions,
     user, session,
+    all_dashboards, all_favorites, all_looks,
     dashboard, look,
-
     setDashboard,
     editing, setEditing,
   }

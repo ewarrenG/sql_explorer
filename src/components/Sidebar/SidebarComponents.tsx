@@ -4,11 +4,11 @@ import styled, { keyframes, css } from 'styled-components'
 
 export const SidebarButton = ({children, ...props}) => {
   return  <ButtonTransparent
-  {...props}
-  size="xsmall"
-  fullWidth
->{children}
-</ButtonTransparent>
+    {...props}
+    size="xsmall"
+    fullWidth
+  >{children}
+  </ButtonTransparent>
 }
 
 export const SidebarBox = styled(Box)`
