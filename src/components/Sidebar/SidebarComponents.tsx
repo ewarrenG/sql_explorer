@@ -131,18 +131,38 @@ const heartbeat = keyframes`
 }
 `
 
+const color_change = keyframes`
+0% {
+  background: #949dff26;
+}
+100% {
+  background: #949dff00;
+}
+`
+
+
 export const StyledMenuItem = styled(MenuItem)`
 
   &[aria-current='true'] {
     background: #949dff26;
   }
+
+  &[aria-current='false'] {
+    ${props=>{
+      if (props.animate) {
+        return css`
+        -webkit-animation: ${color_change} 1.0s linear 1 alternate both;
+        animation: ${color_change} 1.0s linear 1 alternate both;
+        `
+      }
+    }}
+  }
   &[aria-current='false'] > button > div {  
     ${(props=>{
         if ( props.animate ) {
-          console.log('hello')
           return css`    
-            -webkit-animation: ${heartbeat_webkit} 1.5s ease-in-out 2 both;
-            animation: ${heartbeat} 1.5s ease-in-out 2 both;
+            -webkit-animation: ${heartbeat_webkit} 1.5s ease-in-out 4 both;
+            animation: ${heartbeat} 1.5s ease-in-out 4 both;
           `
         } else {
           return css``

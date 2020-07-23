@@ -39,7 +39,7 @@ export const Sidebar: React.FC<any> = ({ selection, last_selection, refresh_qid,
         const timer = setTimeout(() => { 
           resetSidebarNotification(route)
           setStart(false)
-        }, 2000);
+        }, 6000);
         return () => clearTimeout(timer);
       }
     }, [start])
