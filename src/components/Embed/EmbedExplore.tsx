@@ -8,7 +8,7 @@ import {
 } from "@looker/extension-sdk-react"
 import { Button, Heading, MenuItemProps, MenuItem, Dialog, DialogContent, Text, Flex, Space, FlexItem, Grid } from "@looker/components"
 import AppContext from "../../AppContext"
-import { LoadingSvg } from "../LoadingSvg"
+import { LoadingSvg } from "../LookerGCPLoading"
 import { Link as RouterLink, LinkProps } from 'react-router-dom'
 import { omit, compact } from "lodash"
 import { ROUTES } from "../../App"

@@ -8,7 +8,7 @@ import {
 } from "@looker/extension-sdk-react"
 import styled from 'styled-components'
 import AppContext from "../../AppContext"
-import { LoadingSvg } from "../LoadingSvg"
+import { LoadingSvg } from "../LookerGCPLoading"
 
 export const EmbedDashboard: React.FC<EmbedProps> = () => {
   const [dashboardNext, setDashboardNext] = React.useState(true)
