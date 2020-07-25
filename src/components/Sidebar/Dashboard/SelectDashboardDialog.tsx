@@ -6,7 +6,7 @@ import { SidebarButton } from '../SidebarComponents';
 import AppContext from '../../../AppContext';
 import { DashboardTabs } from './DashboardTabs';
 import { ROUTES } from '../../../App';
-import { LoadingSvg } from '../../LoadingSvg';
+import { LoadingSvg } from '../../LookerGCPLoading';
 
 
 export function SelectDashboardDialog() {

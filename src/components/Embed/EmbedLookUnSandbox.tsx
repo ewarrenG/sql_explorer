@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useRef, useState, useEffect } from "react"
 import { LookerEmbedSDK, LookerEmbedLook } from '@looker/embed-sdk'
 import styled from 'styled-components'
-import { LoadingSvg } from "../LoadingSvg"
+import { LoadingSvg } from "../LookerGCPLoading"
 import AppContext from "../../AppContext"
 
 export const EmbedLookUnSandbox = () => {
