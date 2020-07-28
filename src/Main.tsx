@@ -14,7 +14,7 @@ import { ROUTES } from './App';
 import { EmbedLookUnSandbox } from './components/Embed/EmbedLookUnSandbox';
 import refresh from './MainRefresh';
 import { sortBy, filter } from 'lodash';
-import { TourWrapper } from './components/Tour/ReactTour';
+import { TourWrapper } from './components/Tour/TourWrapper';
 
 
 export const LOOK_SEARCH_FIELDS = "id,title,description,user_id,folder,model"
@@ -37,6 +37,8 @@ export function Main() {
   const [did, setDid] = useState(app_search_params.did)
   const [sql, setSql] = useState(app_search_params.sql)
   const [lid, setLid] = useState(app_search_params.lid)
+  const [tour_open, setTourOpen] = useState(true);
+
   const [selection, setSelection] = useState((pathname && pathname.length >= 2) ? pathname : ROUTES.EMBED_SQL)
   const [last_selection, setLastSelection] = useState("");
   const [toggle, setToggle] = useState(app_search_params.toggle)
@@ -292,7 +294,10 @@ export function Main() {
     dashboard, look,
     setDashboard,
     editing, setEditing,
+    tour_open, setTourOpen
   }
+
+  console.log(editing)
   
   return (
     <AppContext.Provider

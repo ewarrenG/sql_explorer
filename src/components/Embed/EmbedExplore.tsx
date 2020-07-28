@@ -108,9 +108,11 @@ export const EmbedExplore = () => {
             columns={1} 
           >
             <Text>You need to run SQL before you can explore it</Text>
-            <StyledRouterLink onClick={()=>{setAppParams({selection: ROUTES.EMBED_SQL})}}>
-              <Button>Go to SQL</Button>
-            </StyledRouterLink>
+              <Button 
+                onClick={()=>{setAppParams({selection: ROUTES.EMBED_SQL})}} 
+              >
+                Go to SQL
+              </Button>
           </Grid>
         </DialogContent>
       </Dialog>}
@@ -133,20 +135,4 @@ const EmbedContainer = styled.div`
     frameborder: 0;
   }
   #lk-nav-main { display: none; }  
-`
-
-const StyledRouterLinkInner: React.FC<LinkProps & MenuItemProps> = (props) => (
-  <RouterLink {...omit(props, 'customizationProps')} />
-)
-
-const StyledRouterLink = styled(StyledRouterLinkInner)`
-text-decoration: none;
-&:focus,
-&:hover,
-&:visited,
-&:link,
-& > a { margin: auto }
-&:active {
-  text-decoration: none;
-}
 `

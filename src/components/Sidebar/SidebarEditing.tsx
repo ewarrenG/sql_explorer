@@ -20,7 +20,7 @@ export function SidebarEditing() {
         query_id: query.id
       }))
       triggerLidIframeReload();
-      
+
       setAppParams({
         selection: ROUTES.EMBED_LOOK
       })

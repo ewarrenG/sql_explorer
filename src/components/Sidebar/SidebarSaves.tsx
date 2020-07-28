@@ -19,7 +19,7 @@ export function SidebarSaves() {
   const [look_title, setLookTitle] = useState('')
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.coreSDK
-  const { did, qid, dashboard, setDashboard, triggerDidIframeReload, runRefreshes, setAppParams } = useContext(AppContext)
+  const { did, qid, dashboard, setDashboard, triggerDidIframeReload, runRefreshes, setAppParams, tour_open } = useContext(AppContext)
   
 
   const handleDbSubmit = async () => {
@@ -63,9 +63,9 @@ export function SidebarSaves() {
       <SidebarButton onClick={() => setDbOpen(true)}>Save to Dashboard</SidebarButton>
       {/* Save Dashboard Dialog */}
       <Dialog
-        isOpen={db_open}
+        isOpen={db_open && !tour_open}
         onClose={() => setDbOpen(false)}
-        maxWidth={(db_dialog_ready) ? "35vw" : "85vw"}
+        maxWidth={"calc(100vw - 450px)"}
         width={(db_dialog_ready) ? "35vw" : "85vw"}
       >
         {db_dialog_ready && <>
@@ -103,9 +103,9 @@ export function SidebarSaves() {
       </Dialog>
       {/* Save Look Dialog */}
       <Dialog
-        isOpen={look_open}
+        isOpen={look_open && !tour_open}
         onClose={() => setLookOpen(false)}
-        maxWidth={"35vw"}
+        maxWidth={"calc(100vw - 450px)"}
         width={"35vw"}
       >
         <CreateLookFolderDialog {...{

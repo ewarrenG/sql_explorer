@@ -10,7 +10,7 @@ import { filter } from 'lodash';
 export function SidebarDashboardElementEdit() {
   const [open, setOpen] = useState(false)
 
-  const { dashboard } = useContext(AppContext)
+  const { dashboard, tour_open } = useContext(AppContext)
 
 
   const turnDialogOff = () => { setOpen(false) }
@@ -21,9 +21,9 @@ export function SidebarDashboardElementEdit() {
   return (
     <>
       <Dialog
-        isOpen={open}
+        isOpen={open && !tour_open}
         onClose={() => turnDialogOff()}
-        maxWidth={"55vw"}
+        maxWidth={"calc(100vw - 450px)"}
         width={"55vw"}
       >
         <DialogHeader>Choose a SQL tile to edit</DialogHeader>

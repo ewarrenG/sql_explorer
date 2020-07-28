@@ -10,7 +10,7 @@ import { LoadingSvg } from '../../LookerGCPLoading';
 
 export function SelectLookDialog() {
   const [open, setOpen] = useState(false)
-  const {all_looks, all_favorites, lid, selection} = useContext(AppContext)
+  const {all_looks, all_favorites, lid, selection, tour_open} = useContext(AppContext)
 
   useEffect(() => {
     if (!lid && selection === ROUTES.EMBED_LOOK) {
@@ -25,9 +25,9 @@ export function SelectLookDialog() {
   return (
     <>
       <Dialog
-        isOpen={open}
+        isOpen={open && !tour_open}
         onClose={() => turnDialogOff()}
-        maxWidth={"85vw"}
+        maxWidth={"calc(100vw - 450px)"}
         width={"85vw"}
       >
         {!ready && <LoadingSvg toggle_loading={true} m="xxlarge"/>}
