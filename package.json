@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@hot-loader/react-dom": "^16.13.0",
-    "@looker/components": "0.9.6",
+    "@looker/components": "0.9.7",
     "@looker/embed-sdk": "1.0.0-beta.6",
     "@looker/extension-sdk": "^0.10.3",
     "@looker/extension-sdk-react": "^0.6.0",
@@ -40,6 +40,7 @@
     "moment": "^2.24.0",
     "nodemon": "^2.0.4",
     "react": "^16.13.1",
+    "react-ace": "^9.1.1",
     "react-dom": "^16.13.1",
     "react-hot-loader": "^4.12.20",
     "react-router-dom": "^5.1.2",

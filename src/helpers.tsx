@@ -42,7 +42,10 @@ export const exploreEmbedPath = (qid:string, toggle:string) => {
   return `?qid=${qid}&toggle=${toggle}`
 }
 
-export function apiCall(method: string, path: string, queryParams: string, payload: any) {
+export function apiCall( method: string, 
+                         path: string, 
+                         queryParams: string = '', 
+                         payload: any = undefined) {
   let url = [path, queryParams].join('?')
   let obj: any = {
     method: method,

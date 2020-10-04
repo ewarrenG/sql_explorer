@@ -14,6 +14,8 @@ import { ROUTES } from './App';
 import { EmbedLookUnSandbox } from './components/Embed/EmbedLookUnSandbox';
 import refresh from './MainRefresh';
 import { sortBy, filter } from 'lodash';
+import { SqlPage } from './components/Sql/SqlPage';
+import SqlContext, { SqlContextProvider } from './components/Sql/SqlContext';
 
 
 export const LOOK_SEARCH_FIELDS = "id,title,description,user_id,folder,model"
@@ -298,31 +300,34 @@ export function Main() {
       value={context}
     >
       <Layout>
-        <Sidebar {...{selection, last_selection, refresh_qid, refresh_did, refresh_sql, refresh_lid, resetSidebarNotification}} />
-        <Box >
-          <Switch>
-            <Route path={"/:selection"}>
-              <StyledBox show={(selection === ROUTES.EMBED_SQL)}>
-                <EmbedSql />
-              </StyledBox>
-              <StyledBox show={(selection === ROUTES.EMBED_EXPLORE)}>
-                <EmbedExplore />
-              </StyledBox>
-              <StyledBox show={(selection === ROUTES.EMBED_DASHBOARD)}>
-                <EmbedDashboard />
-              </StyledBox>
-              <StyledBox show={(selection === ROUTES.EMBED_LOOK)}>
-                <EmbedLookUnSandbox 
-                  key={`/lid::${lid_iframe_reload}`}
-                />
-              </StyledBox>
-              <StyledBox show={(selection === ROUTES.HELP)}>
-                <>Help!</>
-              </StyledBox>
-            </Route>
-            <Redirect to="/sql" />
-          </Switch>
-        </Box>
+        <SqlContextProvider>
+          <Sidebar {...{selection, last_selection, refresh_qid, refresh_did, refresh_sql, refresh_lid, resetSidebarNotification}} />
+          <Box >
+            <Switch>
+              <Route path={"/:selection"}>
+                <StyledBox show={(selection === ROUTES.EMBED_SQL)}>
+                  {/* <EmbedSql /> */}
+                  <SqlPage />
+                </StyledBox>
+                <StyledBox show={(selection === ROUTES.EMBED_EXPLORE)}>
+                  <EmbedExplore />
+                </StyledBox>
+                <StyledBox show={(selection === ROUTES.EMBED_DASHBOARD)}>
+                  <EmbedDashboard />
+                </StyledBox>
+                <StyledBox show={(selection === ROUTES.EMBED_LOOK)}>
+                  <EmbedLookUnSandbox 
+                    key={`/lid::${lid_iframe_reload}`}
+                  />
+                </StyledBox>
+                <StyledBox show={(selection === ROUTES.HELP)}>
+                  <>Help!</>
+                </StyledBox>
+              </Route>
+              <Redirect to="/sql" />
+            </Switch>
+          </Box>
+        </SqlContextProvider>
       </Layout>
     </AppContext.Provider>
   );
@@ -337,4 +342,5 @@ const Layout = styled(Box)`
   grid-template-columns: 200px auto;
   width: 100vw;
   height: 100vh;
+  overflow: hidden;
 `
