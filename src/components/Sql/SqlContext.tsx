@@ -3,53 +3,55 @@ import { apiCall, exploreEmbedPath, getFields } from '../../helpers';
 import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
 import AppContext from '../../AppContext';
 import { sortBy, find, filter } from 'lodash'
- 
+
 export const SqlContext = React.createContext<any>(null);
 
 export interface ISqlContext {
   connections: any | undefined,
   models: any | undefined,
-  current_connection: string | undefined, 
+  current_connection: string | undefined,
   setCurrentConnection: any,
-  current_model: string | undefined, 
+  current_model: string | undefined,
   setCurrentModel: any,
-  current_schemas: any, 
+  current_schemas: any,
   setCurrentSchemas: any,
-  tables: any, 
-  setCurrentTable: any, 
-  written_sql: string | undefined, 
+  tables: any,
+  setCurrentTable: any,
+  written_sql: string | undefined,
   setWrittenSql: any,
-  use_model: boolean, 
+  use_model: boolean,
   setUseModel: any,
-  update_prepared: boolean, 
+  update_prepared: boolean,
   setUpdatePrepared: any,
-  schemas: any, 
+  schemas: any,
   setSchemas: any,
   current_tables: any,
   current_columns: any,
-  handleRun: any, 
+  handleRun: any,
   running: boolean,
   setRunning: any,
-  results: any, setResults: any
+  results: any, setResults: any,
+  selected_query: any, setSelectedQuery: any
 }
 
-export const SqlContextProvider = ({children}: any) => {
-  const [ connections, setConnections ] = useState()
-  const [ written_sql, setWrittenSql ] = useState()
-  const [ running, setRunning ] = useState(false)
-  const [ models, setModels ] = useState()
-  const [ current_connection, setCurrentConnection ] = useState()
-  const [ current_model, setCurrentModel ] = useState()
-  const [ use_model, setUseModel ] = useState(false)
-  const [ update_prepared, setUpdatePrepared ] = useState(true)
-  const [ schemas, setSchemas ] = useState()
-  const [ current_schemas, setCurrentSchemas ] = useState()
-  const [ tables, setTables] = useState()
-  const [ current_tables, setCurrentTable ] = useState()
-  const [ columns, setColumns ] = useState()
-  const [ current_columns, setCurrentColumns ] = useState()
-  const [ table_limit, setTableLimit ] = useState(500)
-  const [ results, setResults ] = useState()
+export const SqlContextProvider = ({ children }: any) => {
+  const [connections, setConnections] = useState()
+  const [written_sql, setWrittenSql] = useState() //need
+  const [running, setRunning] = useState(false)
+  const [models, setModels] = useState()
+  const [current_connection, setCurrentConnection] = useState('looker-private-demo') //need
+  const [current_model, setCurrentModel] = useState()
+  const [use_model, setUseModel] = useState(false)
+  const [update_prepared, setUpdatePrepared] = useState(true)
+  const [schemas, setSchemas] = useState()
+  const [current_schemas, setCurrentSchemas] = useState('ecomm')
+  const [tables, setTables] = useState()
+  const [current_tables, setCurrentTable] = useState('order_items')
+  const [columns, setColumns] = useState()
+  const [current_columns, setCurrentColumns] = useState()
+  const [table_limit, setTableLimit] = useState(500)
+  const [results, setResults] = useState()
+  const [selected_query, setSelectedQuery] = useState()
 
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.core40SDK
@@ -58,16 +60,16 @@ export const SqlContextProvider = ({children}: any) => {
 
   const getQid = (slug: string, query_json_detail: any) => {
 
-    let {selected, dynamic_fields} = getFields(query_json_detail);
+    let { selected, dynamic_fields } = getFields(query_json_detail);
 
-    const { 
-      keep_fields, 
-      keep_sorts, 
-      keep_filters, 
-      keep_vis, 
+    const {
+      keep_fields,
+      keep_sorts,
+      keep_filters,
+      keep_vis,
       keep_dynamic_fields
     } = sql_options
-    
+
     var new_query: any = {
       model: `sql__${slug}`,
       view: `sql_runner_query`,
@@ -77,7 +79,7 @@ export const SqlContextProvider = ({children}: any) => {
 
     var current_query;
 
-    return new Promise(async (resolve, reject)=>{
+    return new Promise(async (resolve, reject) => {
 
       if (qid) {
         // get current qid to layer on old configs
@@ -89,8 +91,8 @@ export const SqlContextProvider = ({children}: any) => {
       if (qid) {
         // get current qid to layer on old configs
         current_query = sdk.ok(sdk.query_for_slug(qid))
-  
-        if (keep_fields) { 
+
+        if (keep_fields) {
           new_query['fields'] = (current_query.fields && current_query.fields.length) ? current_query.fields : selected;
           new_query['pivots'] = current_query.pivots;
         }
@@ -101,48 +103,48 @@ export const SqlContextProvider = ({children}: any) => {
           new_query['dynamic_fields'] = current_query.dynamic_fields || ""
         }
       }
-      
-      const q = await sdk.ok(sdk.create_query(new_query,'client_id'))
-      resolve(q.client_id) 
+
+      const q = await sdk.ok(sdk.create_query(new_query, 'client_id'))
+      resolve(q.client_id)
     })
-    
+
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     getConnections();
     getModels();
   }, [])
 
-  useEffect(()=>{
+  useEffect(() => {
     if (sql) {
       getSql();
     }
-  },[sql])
+  }, [sql])
 
-  useEffect(()=>{
+  useEffect(() => {
     if (current_connection) {
       getSchemas();
     } else {
       setSchemas(undefined)
     }
-  },[current_connection])
+  }, [current_connection])
 
-  useEffect(()=>{
+  useEffect(() => {
     setCurrentTable(undefined)
     setCurrentColumns(undefined)
     if (current_schemas && current_schemas.length) {
       getTables();
     }
-  },[current_schemas])
+  }, [current_schemas])
 
-  useEffect(()=>{
+  useEffect(() => {
     if (current_tables?.length && columns?.length) {
       getColumns();
     }
-  },[current_tables, columns])
+  }, [current_tables, columns])
 
   const getSql = async () => {
-    const s =  await sdk.ok(sdk.sql_query(sql))
+    const s = await sdk.ok(sdk.sql_query(sql))
     setWrittenSql(s.sql)
     setCurrentConnection(s.connection.name)
   }
@@ -153,35 +155,36 @@ export const SqlContextProvider = ({children}: any) => {
   }
 
   const getConnections = async () => {
-    const conns = await sdk.ok(sdk.all_connections())
+    const conns = await sdk.ok(sdk.all_connections());
+    console.log('conns', conns)
     setConnections(conns)
   }
 
   const getSchemas = async () => {
-    const s = await apiCall('GET', `/api/internal/connections/${current_connection}/schemas/tables`,`limit=${table_limit}`)
+    const s = await apiCall('GET', `/api/internal/connections/${current_connection}/schemas/tables`, `limit=${table_limit}`)
     setSchemas(s)
   }
 
   const getTables = async () => {
-    const cur_schemas = filter(schemas, (o)=>{ return current_schemas.indexOf(o.name) > -1})
+    const cur_schemas = filter(schemas, (o) => { return current_schemas.indexOf(o.name) > -1 })
     if (cur_schemas && cur_schemas.length) {
       let new_tables: any = []
       let columns: any = []
-      cur_schemas.forEach((s: any)=>{
-        columns.push(apiCall('GET', `/api/internal/connections/${current_connection}/schemas/${s.name}/columns`,`table_limit=${table_limit}`))
+      cur_schemas.forEach((s: any) => {
+        columns.push(apiCall('GET', `/api/internal/connections/${current_connection}/schemas/${s.name}/columns`, `table_limit=${table_limit}`))
         if (s && s.tables) {
           s.tables.forEach((t: any) => {
-            new_tables.push({schema: s.name, ...t})
+            new_tables.push({ schema: s.name, ...t })
           })
         }
       })
       setTables(new_tables)
       const all_cols = await Promise.all(columns)
       var merged_tables = []
-      cur_schemas.forEach((s: any, i: number)=>{
+      cur_schemas.forEach((s: any, i: number) => {
         const cur_table: any = all_cols[i];
-        cur_table.forEach((t: any)=>{
-          merged_tables.push({...t, schema: s.name})
+        cur_table.forEach((t: any) => {
+          merged_tables.push({ ...t, schema: s.name })
         })
       })
       setColumns(merged_tables)
@@ -189,27 +192,27 @@ export const SqlContextProvider = ({children}: any) => {
       setTables(undefined)
       setColumns(undefined)
     }
-    
 
-    
+
+
   }
 
   const getColumns = async () => {
-    const filtered = filter(columns, (o)=>{
-      return ( current_schemas === (o.schema) && current_tables == (o.name) )
+    const filtered = filter(columns, (o) => {
+      return (current_schemas === (o.schema) && current_tables == (o.name))
     })
     // const merged = [].concat.apply([], filtered);
     setCurrentColumns(filtered)
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     if (running) {
       handleRun();
     }
-  },[running])
+  }, [running])
 
   const handleRun = () => {
-    console.log('run', {use_model})
+    console.log('run', { use_model })
     if (use_model) {
       handleModelRun();
     } else {
@@ -218,13 +221,16 @@ export const SqlContextProvider = ({children}: any) => {
   }
 
   const handleConnectionRun = async () => {
-    console.log({t: 'connection', current_connection, written_sql})
+    console.log('handleConnectionRun')
+    console.log({ t: 'connection', current_connection, written_sql })
     const s = await sdk.ok(sdk.create_sql_query({
       connection_name: current_connection,
       sql: written_sql
     }))
+    console.log('s', s)
     if (s?.slug) {
       const r = await sdk.ok(sdk.run_sql_query(s.slug, 'json_detail'));
+      console.log('r', r)
       setResults(r);
       if (r?.data?.length) {
         const qid = await getQid(s.slug, r)
@@ -240,9 +246,9 @@ export const SqlContextProvider = ({children}: any) => {
   }
 
   const handleModelRun = async () => {
-    console.log({t: 'model', current_connection, written_sql})
+    console.log({ t: 'model', current_connection, written_sql })
     const s = sdk.ok(sdk.create_sql_query({
-      
+
     }))
     setRunning(false);
   }
@@ -263,9 +269,10 @@ export const SqlContextProvider = ({children}: any) => {
     columns,
     handleRun,
     running, setRunning,
-    results, setResults
+    results, setResults,
+    selected_query, setSelectedQuery
   }
-  
+
   return <SqlContext.Provider
     value={context}
   >

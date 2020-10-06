@@ -47,6 +47,8 @@ export function SqlResults() {
     })
   }
 
+  console.log('results', results)
+
   if (results?.data?.length) {
     return (
       // <>
@@ -65,7 +67,7 @@ export function SqlResults() {
       <>
         <Heading>Runtime</Heading>
         <div ref={targetRef}>
-          <Paragraph>{results.runtime}</Paragraph>
+          <Paragraph>Runtime: {results.runtime ? results.runtime : 'Processing'}</Paragraph>
         </div>
       </>
     );

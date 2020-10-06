@@ -17,34 +17,34 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 import { uniq } from 'lodash';
 
 export function SqlEditor() {
-  const [ prepared, setPrepared] = useState()
-  const [ editor, setEditor] = useState()
-  const [ completers, setCompleters] = useState<ISqlCompleter[]>(sql_completers)
-    const { 
-      setWrittenSql, 
-      written_sql, 
-      use_model, 
-      current_connection, 
-      current_model, 
-      setUpdatePrepared ,
-      current_columns,
-      setRunning
-    } = useContext(SqlContext)
+  const [prepared, setPrepared] = useState()
+  const [editor, setEditor] = useState()
+  const [completers, setCompleters] = useState<ISqlCompleter[]>(sql_completers)
+  const {
+    setWrittenSql,
+    written_sql,
+    use_model,
+    current_connection,
+    current_model,
+    setUpdatePrepared,
+    current_columns,
+    setRunning
+  } = useContext(SqlContext)
 
-  useEffect(()=>{
+  useEffect(() => {
     if (current_columns?.length && current_columns[0]?.columns.length) {
       const curr = current_columns[0]
-      setCompleters(uniq([...completers, ...currentColumnCompleter(curr.columns, curr.schema_name, curr.name) ]))
+      setCompleters(uniq([...completers, ...currentColumnCompleter(curr.columns, curr.schema_name, curr.name)]))
     }
-  },[current_columns])
+  }, [current_columns])
 
-  useEffect(()=>{
+  useEffect(() => {
     if (editor && completers.length) {
       const arr: any = [];
       editor.completers = arr;
       editor.completers.push(completerFunction(completers));
     }
-  },[completers])
+  }, [completers])
 
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.coreSDK
@@ -56,22 +56,22 @@ export function SqlEditor() {
         mac: "Command-Enter",
         win: "Ctrl-Enter"
       },
-      exec: ()=>{setRunning(true)}
+      exec: () => { setRunning(true) }
     }
   ]
 
-    return (
+  return (
     <>
       <Heading>SQL</Heading>
       <AceEditor
         height="calc( 100% - 28px )"
-        onLoad={(ed)=>setEditor(ed)}
+        onLoad={(ed) => setEditor(ed)}
         width="100%"
         placeholder=""
         theme="textmate"
         mode={LANG}
         name="sql-editor"
-        onChange={(v,i)=>setWrittenSql(v)}
+        // onChange={(v, i) => setWrittenSql(v)}
         fontSize={14}
         showPrintMargin={false}
         showGutter={true}
@@ -85,13 +85,14 @@ export function SqlEditor() {
           enableSnippets: false,
           showLineNumbers: true,
           tabSize: 2,
-        }}/>
+        }}
+        readOnly={true} />
     </>
   );
 }
 
 const currentColumnCompleter = (columns, schema, table) => {
-  return columns.map((c,i)=>{
+  return columns.map((c, i) => {
     return {
       value: c.name,
       meta: `${schema}.${table}: (${c.data_type_database})`,
