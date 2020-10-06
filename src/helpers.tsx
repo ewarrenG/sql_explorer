@@ -7,10 +7,11 @@ export const app_search_params = [
 ]
 
 export const appSearchPick = (app_obj) => {
+  
   if (!app_obj) { return {} }
   let out: any = {}
   app_search_params.forEach(a => {
-    if (app_obj[a] && app_obj[a].length) {
+    if (app_obj[a]) {
       out[a] = app_obj[a]
     }
   })
@@ -42,7 +43,10 @@ export const exploreEmbedPath = (qid:string, toggle:string) => {
   return `?qid=${qid}&toggle=${toggle}`
 }
 
-export function apiCall(method: string, path: string, queryParams: string, payload: any) {
+export function apiCall( method: string, 
+                         path: string, 
+                         queryParams: string = '', 
+                         payload: any = undefined) {
   let url = [path, queryParams].join('?')
   let obj: any = {
     method: method,
@@ -110,8 +114,8 @@ export function getFields(explore: any) {
 
 const snakeCase = (string: string) => {
   return string.replace(/\W+/g, " ")
+    .trim()
     .split(/ |\B(?=[A-Z])/)
     .map(word => word.toLowerCase())
     .join('_');
 };
-
