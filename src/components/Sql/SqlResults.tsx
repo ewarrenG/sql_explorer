@@ -9,7 +9,7 @@ const FONT_SIZE = 'xsmall'
 
 export function SqlResults() {
   const { results } = useContext(SqlContext)
-  const [dimensions, setDimensions] = useState({ width:0, height: 0 });
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const targetRef = useRef()
 
   useLayoutEffect(() => {
@@ -22,10 +22,10 @@ export function SqlResults() {
   }, [targetRef]);
 
   const HeaderRows = () => {
-    
+
     return <TableRow>
-      {results.fields.dimensions.map((f,i)=>{
-        return <TableHeaderCell 
+      {results.fields.dimensions.map((f, i) => {
+        return <TableHeaderCell
           key={`header::${i}`}
           fontSize={FONT_SIZE}
         >
@@ -36,11 +36,11 @@ export function SqlResults() {
   }
 
   const TableRows = () => {
-    return results.data.map((row,i)=>{
+    return results.data.map((row, i) => {
       return <TableRow key={`row::${i}`}>
-        {results.fields.dimensions.map((f,i)=>{
+        {results.fields.dimensions.map((f, i) => {
           return <TableDataCell fontSize={FONT_SIZE} key={`cell::${f.name}::${i}`}>
-            { row[f.name].value || row[f.name] }
+            {row[f.name].value || row[f.name]}
           </TableDataCell>
         })}
       </TableRow>
@@ -49,20 +49,26 @@ export function SqlResults() {
 
   if (results?.data?.length) {
     return (
-    <>
-      <Heading>Results</Heading>
-      <div ref={targetRef}>
-        <Table>
-          <TableHead>
-            <HeaderRows />
-          </TableHead>
-          <TableBody>
-            <TableRows />
-          </TableBody>
-        </Table>
-      </div>
-    </>
-    ); 
+      // <>
+      //   <Heading>Results</Heading>
+      //   <div ref={targetRef}>
+      //     <Table>
+      //       <TableHead>
+      //         <HeaderRows />
+      //       </TableHead>
+      //       <TableBody>
+      //         <TableRows />
+      //       </TableBody>
+      //     </Table>
+      //   </div>
+      // </>
+      <>
+        <Heading>Runtime</Heading>
+        <div ref={targetRef}>
+          <Paragraph>{results.runtime}</Paragraph>
+        </div>
+      </>
+    );
   } else {
     return <>
       <Heading>Results</Heading>
