@@ -1,4 +1,4 @@
-import { Box, StyledMenuItemProps, Heading, MenuList, Icon } from '@looker/components'
+import { Box, StyledMenuItemProps, Heading, MenuList, Icon, Text } from '@looker/components'
 import  React, { useContext, useEffect, useState } from 'react'
 import { Link as RouterLink, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
@@ -65,8 +65,8 @@ export const Sidebar: React.FC<any> = ({ selection, last_selection, refresh_qid,
       <Heading 
         pl="small"
         mb="small"
-        fontSize="xlarge"
-      >SQL Explorer</Heading>
+        fontSize="large"
+      >SQL Explorer <Text fontSize="xxsmall">(alpha)</Text></Heading>
         <SidebarMenuItem
           route={ROUTES.EMBED_SQL}
           refresh={refresh_sql}
@@ -110,9 +110,3 @@ export const Sidebar: React.FC<any> = ({ selection, last_selection, refresh_qid,
     </Box>
   )
 }
-
-
-
-const StyledRouterLinkInner: React.FC<LinkProps & StyledMenuItemProps> = (props) => (
-  <RouterLink {...omit(props, 'customizationProps')} />
-)

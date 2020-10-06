@@ -64,11 +64,12 @@ export function SidebarEditing() {
 }
 
 const StyledMenuItem = styled(MenuItem)`
-background: #949dff26;
-&:hover { background: #949dff26; }
+  list-style: none;
+  background: #949dff26;
+  &:hover { background: #949dff26; }
 `
 
 const StyledBox = styled(Box)`
-background: #949dff26;
+  background: #949dff26;
 `
 

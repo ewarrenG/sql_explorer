@@ -8,10 +8,10 @@ import { exploreEmbedPath } from '../../../helpers';
 import { ROUTES } from '../../../App';
 
 export function SidebarLook() {
-  const { lid,  toggle, setEditing, look, setQidEmbedPath, setSqlEmbedPath, editing, setAppParams} = useContext(AppContext)
+  const { lid, toggle, setEditing, look, setLook, setQidEmbedPath, setSqlEmbedPath, editing, setAppParams} = useContext(AppContext)
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const { extensionSDK } = extensionContext
-  const sdk = extensionContext.coreSDK
+  const sdk = extensionContext.core40SDK
 
 
   const handleLookEdit = async () => {
@@ -36,12 +36,31 @@ export function SidebarLook() {
     setSqlEmbedPath("/"+sql)
   }
 
+  const newLook = async () => {
+    const new_look = await sdk.ok(sdk.look(look.id))
+    setLook(new_look)
+  }
+
+  const favoriteLook = async () => {
+    await sdk.ok(sdk.create_content_favorite({
+      content_metadata_id: look.content_metadata_id
+    }))
+    newLook();
+  }
+
+  const removeFavoriteLook = async () => {
+    await sdk.ok(sdk.delete_content_favorite(look.content_favorite_id));
+    newLook();
+  }
+
   return (
     <SidebarContainer>
       <SidebarGroupLook hide_title={true} />
       <SidebarHeading>Actions</SidebarHeading>
       <SidebarBox>
         {lid && <SidebarButton disabled={(editing)} onClick={handleLookEdit}>Edit Look</SidebarButton>}
+        {lid && !(look?.content_favorite_id) && <SidebarButton onClick={favoriteLook}>Favorite Look</SidebarButton>}
+        {lid && look?.content_favorite_id && <SidebarButton onClick={removeFavoriteLook}>Remove Favorite</SidebarButton>}
         <SidebarButton onClick={()=>{extensionSDK.openBrowserWindow(`/looks/${lid}`)}}>Open in Looker</SidebarButton>
       </SidebarBox>
     </SidebarContainer>

@@ -142,7 +142,7 @@ const color_change = keyframes`
 
 
 export const StyledMenuItem = styled(MenuItem)`
-
+  list-style: none;
   &[aria-current='true'] {
     background: #949dff26;
   }

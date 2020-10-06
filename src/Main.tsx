@@ -16,6 +16,7 @@ import refresh from './MainRefresh';
 import { sortBy, filter } from 'lodash';
 import { SqlPage } from './components/Sql/SqlPage';
 import SqlContext, { SqlContextProvider } from './components/Sql/SqlContext';
+import { LookMain } from './components/Embed/Look/LookMain';
 
 
 export const LOOK_SEARCH_FIELDS = "id,title,description,user_id,folder,model"
@@ -121,7 +122,6 @@ export function Main() {
         resetRefreshLid();
         break;
       case EMBED_EXPLORE:
-        console.log('hi')
         resetRefreshQid();
         break;
     }
@@ -212,6 +212,7 @@ export function Main() {
     setQidEmbedPath(exploreEmbedPath(q.client_id!, toggle || ''))
   }
 
+
   const getLook = async () => {
     const l = await sdk.ok(sdk.look(Number(lid)))
     setLook(l)
@@ -291,8 +292,9 @@ export function Main() {
     user, session,
     all_dashboards, all_favorites, all_looks,
     dashboard, look,
-    setDashboard,
-    editing, setEditing,
+    setDashboard, setLook,
+    editing, setEditing
+    
   }
   
   return (
@@ -316,7 +318,7 @@ export function Main() {
                   <EmbedDashboard />
                 </StyledBox>
                 <StyledBox show={(selection === ROUTES.EMBED_LOOK)}>
-                  <EmbedLookUnSandbox 
+                  <LookMain 
                     key={`/lid::${lid_iframe_reload}`}
                   />
                 </StyledBox>
