@@ -2,7 +2,20 @@ import React, { useState, useEffect, useContext } from 'react';
 import { apiCall, exploreEmbedPath, getFields } from '../../helpers';
 import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
 import AppContext from '../../AppContext';
-import { sortBy, find, filter } from 'lodash'
+import { sortBy, find, filter } from 'lodash';
+
+// this isn't going to work, need to do server side?
+// const { BigQuery } = require('@google-cloud/bigquery');
+
+// const options = {
+//   keyFilename: `../../looker-private-demo-4a0ed0ad09a2.json`,
+//   projectId: `${process.env.BIG_QUERY_PROJECT_ID}`,
+// };
+
+// console.log('options', options)
+// console.log('options.keyFilename', options.keyFilename)
+
+// const bigquery = new BigQuery(options);
 
 export const SqlContext = React.createContext<any>(null);
 
@@ -31,7 +44,9 @@ export interface ISqlContext {
   running: boolean,
   setRunning: any,
   results: any, setResults: any,
-  selected_query: any, setSelectedQuery: any
+  selected_query: any, setSelectedQuery: any,
+  big_query_metadata_results: any, setBigQueryMetadataResults: any
+  initial_query_id: any, setInitialQueryId: any
 }
 
 export const SqlContextProvider = ({ children }: any) => {
@@ -52,6 +67,8 @@ export const SqlContextProvider = ({ children }: any) => {
   const [table_limit, setTableLimit] = useState(500)
   const [results, setResults] = useState()
   const [selected_query, setSelectedQuery] = useState()
+  const [big_query_metadata_results, setBigQueryMetadataResults] = useState()
+  const [initial_query_id, setInitialQueryId] = useState()
 
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.core40SDK
@@ -115,11 +132,11 @@ export const SqlContextProvider = ({ children }: any) => {
     getModels();
   }, [])
 
-  useEffect(() => {
-    if (sql) {
-      getSql();
-    }
-  }, [sql])
+  // useEffect(() => {
+  //   if (sql) {
+  //     getSql();
+  //   }
+  // }, [sql])
 
   useEffect(() => {
     if (current_connection) {
@@ -143,6 +160,15 @@ export const SqlContextProvider = ({ children }: any) => {
     }
   }, [current_tables, columns])
 
+  // useEffect(() => {
+  //   console.log('big_query_metadata_results', big_query_metadata_results)
+  // }, [big_query_metadata_results])
+  useEffect(() => {
+    if (initial_query_id) {
+      handleConnectionRun()
+    }
+  }, [initial_query_id])
+
   const getSql = async () => {
     const s = await sdk.ok(sdk.sql_query(sql))
     setWrittenSql(s.sql)
@@ -156,7 +182,6 @@ export const SqlContextProvider = ({ children }: any) => {
 
   const getConnections = async () => {
     const conns = await sdk.ok(sdk.all_connections());
-    console.log('conns', conns)
     setConnections(conns)
   }
 
@@ -212,25 +237,27 @@ export const SqlContextProvider = ({ children }: any) => {
   }, [running])
 
   const handleRun = () => {
-    console.log('run', { use_model })
+    // console.log('run', { use_model })
     if (use_model) {
       handleModelRun();
     } else {
-      handleConnectionRun();
+      // handleConnectionRun();
+      setRunning(true)
+      setInitialQueryId(Math.random().toString(16).slice(2, 10))
     }
   }
 
   const handleConnectionRun = async () => {
-    console.log('handleConnectionRun')
-    console.log({ t: 'connection', current_connection, written_sql })
+    // console.log('handleConnectionRun')
+    // console.log({ t: 'connection', current_connection, written_sql })
+    // start of initial query
     const s = await sdk.ok(sdk.create_sql_query({
       connection_name: current_connection,
-      sql: written_sql
+      sql: `/* ${initial_query_id}*/` + written_sql
     }))
-    console.log('s', s)
     if (s?.slug) {
       const r = await sdk.ok(sdk.run_sql_query(s.slug, 'json_detail'));
-      console.log('r', r)
+      // console.log('r', r)
       setResults(r);
       if (r?.data?.length) {
         const qid = await getQid(s.slug, r)
@@ -242,11 +269,37 @@ export const SqlContextProvider = ({ children }: any) => {
 
       }
     }
+
+    // get user id for metadata query
+    const me = await sdk.ok(sdk.me())
+
+    // const sqlForBigQueryMetadata = `SELECT * FROM ${current_connection}.\`region-us\`.INFORMATION_SCHEMA.JOBS_BY_USER WHERE lower(query) 
+    // LIKE '%${me.id}%' 
+    // AND lower(query) LIKE '%${written_sql.toLowerCase()}%' 
+    // AND timestamp_diff(current_timestamp(), creation_time, minute) <= 1 
+    // ORDER BY creation_time DESC LIMIT 1`;
+
+
+    const sqlForBigQueryMetadata = `SELECT * FROM ${current_connection}.\`region-us\`.INFORMATION_SCHEMA.JOBS_BY_USER WHERE lower(query) 
+    LIKE '%${me.id}%' 
+    AND lower(query) LIKE '%${initial_query_id}%' 
+    AND timestamp_diff(current_timestamp(), creation_time, minute) <= 1 
+    ORDER BY creation_time DESC LIMIT 1`;
+
+
+    const bigQueryMetadataQuery = await sdk.ok(sdk.create_sql_query({
+      connection_name: current_connection,
+      sql: sqlForBigQueryMetadata
+    }))
+    if (bigQueryMetadataQuery?.slug) {
+      const bigQueryMetadataResponse = await sdk.ok(sdk.run_sql_query(bigQueryMetadataQuery.slug, 'json_detail'));
+      setBigQueryMetadataResults(bigQueryMetadataResponse)
+    }
     setRunning(false);
   }
 
   const handleModelRun = async () => {
-    console.log({ t: 'model', current_connection, written_sql })
+    // console.log({ t: 'model', current_connection, written_sql })
     const s = sdk.ok(sdk.create_sql_query({
 
     }))
@@ -270,7 +323,8 @@ export const SqlContextProvider = ({ children }: any) => {
     handleRun,
     running, setRunning,
     results, setResults,
-    selected_query, setSelectedQuery
+    selected_query, setSelectedQuery,
+    big_query_metadata_results, setBigQueryMetadataResults
   }
 
   return <SqlContext.Provider

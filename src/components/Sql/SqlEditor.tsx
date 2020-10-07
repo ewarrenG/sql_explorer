@@ -60,8 +60,10 @@ export function SqlEditor() {
     }
   ]
 
+  // console.log('written_sql', written_sql)
+
   return (
-    <>
+    <Box m="large" height="100%">
       <Heading>SQL</Heading>
       <AceEditor
         height="calc( 100% - 28px )"
@@ -87,7 +89,7 @@ export function SqlEditor() {
           tabSize: 2,
         }}
         readOnly={true} />
-    </>
+    </Box>
   );
 }
 

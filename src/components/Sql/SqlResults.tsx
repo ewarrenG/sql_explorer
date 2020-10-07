@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useRef, useLayoutEffect } from 'react';
 import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
-import { Code, Table, TableBody, TableHead, TableRow, TableHeaderCell, TableDataCell, Heading, Paragraph } from '@looker/components';
+import { Code, Table, TableBody, TableHead, TableRow, TableHeaderCell, TableDataCell, Heading, Paragraph, TextArea, Spinner, Box, SpaceVertical, Flex, CodeBlock, FlexItem } from '@looker/components';
 import styled from 'styled-components'
 import { SqlContext } from './SqlContext';
 import { throttle } from 'lodash';
@@ -8,9 +8,10 @@ import { throttle } from 'lodash';
 const FONT_SIZE = 'xsmall'
 
 export function SqlResults() {
-  const { results } = useContext(SqlContext)
+  const { results, big_query_metadata_results, running } = useContext(SqlContext)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const targetRef = useRef()
+
 
   useLayoutEffect(() => {
     if (targetRef?.current) {
@@ -47,34 +48,37 @@ export function SqlResults() {
     })
   }
 
-  console.log('results', results)
+  return (
+    <Box my="xxxlarge" mx="large" height="100%">
+      {running ?
 
-  if (results?.data?.length) {
-    return (
-      // <>
-      //   <Heading>Results</Heading>
-      //   <div ref={targetRef}>
-      //     <Table>
-      //       <TableHead>
-      //         <HeaderRows />
-      //       </TableHead>
-      //       <TableBody>
-      //         <TableRows />
-      //       </TableBody>
-      //     </Table>
-      //   </div>
-      // </>
-      <>
-        <Heading>Runtime</Heading>
-        <div ref={targetRef}>
-          <Paragraph>Runtime: {results.runtime ? results.runtime : 'Processing'}</Paragraph>
-        </div>
-      </>
-    );
-  } else {
-    return <>
-      <Heading>Results</Heading>
-      <Paragraph>No Results</Paragraph>
-    </>
-  }
+        <Flex justifyContent="center" mb="medium" >
+          <Spinner></Spinner>
+        </Flex> : big_query_metadata_results?.data?.length ?
+          <Flex flexDirection="column" height="100%">
+            <FlexItem>
+              <Heading>Metadata from BigQuery</Heading>
+            </FlexItem>
+
+            <FlexItem height="250px">
+              <TextArea
+                // style={{ overflow: 'hidden', whiteSpace: 'pre', width: '100%', height: '100%', minHeight: '250px' }}
+                style={{ height: '100%' }}
+                value={big_query_metadata_results ? JSON.stringify(big_query_metadata_results.data[0], undefined, 4) : 'Processing...'}>
+              </TextArea>
+            </FlexItem>
+
+            {/* doesn't work */}
+            {/* <FlexItem>
+              <Paragraph>
+                <CodeBlock>{exampleText}</CodeBlock></Paragraph>
+            </FlexItem > */}
+
+          </Flex > :
+          <Flex justifyContent="center" mb="medium">
+            <Paragraph>Run query to see metadata from Big Query</Paragraph>
+          </Flex>
+      }
+    </Box >
+  )
 }
