@@ -84,12 +84,13 @@ export function SqlQueries() {
 
 
   return (
-    <Select
-      options={dropdownSqlQueries}
-      onChange={(value) => {
-        console.log('value', value);
-        setSelectedQuery(value);
-      }}
-    />
+    <Box my="large" mx="large" height="100%">
+      <Select
+        options={dropdownSqlQueries}
+        onChange={(value) => {
+          setSelectedQuery(value);
+        }}
+        style={{ zIndex: '100000' }}
+      /></Box>
   );
 }

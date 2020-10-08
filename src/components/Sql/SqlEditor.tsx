@@ -76,7 +76,7 @@ export function SqlEditor() {
         // onChange={(v, i) => setWrittenSql(v)}
         fontSize={14}
         showPrintMargin={false}
-        showGutter={true}
+        showGutter={false}
         highlightActiveLine={true}
         value={written_sql}
         // @ts-ignore
@@ -88,7 +88,8 @@ export function SqlEditor() {
           showLineNumbers: true,
           tabSize: 2,
         }}
-        readOnly={true} />
+        readOnly={true}
+        zIndex={0} />
     </Box>
   );
 }

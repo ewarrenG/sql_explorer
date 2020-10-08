@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useContext, useRef, useLayoutEffect } from 'react';
 import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
-import { Code, Table, TableBody, TableHead, TableRow, TableHeaderCell, TableDataCell, Heading, Paragraph, TextArea, Spinner, Box, SpaceVertical, Flex, CodeBlock, FlexItem } from '@looker/components';
+import {
+  Code, Table, TableBody, TableHead, TableRow, TableHeaderCell, TableDataCell, Heading, Paragraph, TextArea, Spinner, Box, SpaceVertical, Flex, CodeBlock, FlexItem, Accordion, AccordionContent,
+  AccordionDisclosure
+} from '@looker/components';
 import styled from 'styled-components'
 import { SqlContext } from './SqlContext';
 import { throttle } from 'lodash';
@@ -60,13 +63,51 @@ export function SqlResults() {
               <Heading>Metadata from BigQuery</Heading>
             </FlexItem>
 
-            <FlexItem height="250px">
-              <TextArea
-                // style={{ overflow: 'hidden', whiteSpace: 'pre', width: '100%', height: '100%', minHeight: '250px' }}
-                style={{ height: '100%' }}
-                value={big_query_metadata_results ? JSON.stringify(big_query_metadata_results.data[0], undefined, 4) : 'Processing...'}>
-              </TextArea>
+            <FlexItem>
+              {/* //pull out job_id, state, total_bytes_processed, total_bytes_billed, total_slot_ms */}
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableHeaderCell>Metadata</TableHeaderCell>
+                    <TableHeaderCell>Value</TableHeaderCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableDataCell>job_id</TableDataCell>
+                    <TableDataCell>{big_query_metadata_results.data[0].job_id.value}</TableDataCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableDataCell>state</TableDataCell>
+                    <TableDataCell>{big_query_metadata_results.data[0].state.value}</TableDataCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableDataCell>total_bytes_processed</TableDataCell>
+                    <TableDataCell>{big_query_metadata_results.data[0].total_bytes_processed.value}</TableDataCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableDataCell>total_bytes_billed</TableDataCell>
+                    <TableDataCell>{big_query_metadata_results.data[0].total_bytes_billed.value}</TableDataCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableDataCell>total_slot_ms</TableDataCell>
+                    <TableDataCell>{big_query_metadata_results.data[0].total_slot_ms.value}</TableDataCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </FlexItem>
+
+            <Accordion>
+              <AccordionDisclosure>See full response</AccordionDisclosure>
+              <AccordionContent>
+                <FlexItem height="500px">
+                  <TextArea
+                    style={{ height: '100%', minHeight: "500px" }}
+                    value={big_query_metadata_results ? JSON.stringify(big_query_metadata_results.data[0], undefined, 4) : 'Processing...'}>
+                  </TextArea>
+                </FlexItem></AccordionContent>
+            </Accordion>
+
 
             {/* doesn't work */}
             {/* <FlexItem>

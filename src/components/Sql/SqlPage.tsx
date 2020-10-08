@@ -57,6 +57,7 @@ export function SqlPage() {
 
 const StyledFlex = styled(Flex)`
   height: 100vh;
+  overflow: scroll
 `
 
 const SidebarGrid = styled(Grid)`
