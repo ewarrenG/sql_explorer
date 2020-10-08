@@ -140,7 +140,7 @@ export const SqlContextProvider = ({ children }: any) => {
 
   useEffect(() => {
     if (current_connection) {
-      getSchemas();
+      // getSchemas();
     } else {
       setSchemas(undefined)
     }
@@ -150,7 +150,7 @@ export const SqlContextProvider = ({ children }: any) => {
     setCurrentTable(undefined)
     setCurrentColumns(undefined)
     if (current_schemas && current_schemas.length) {
-      getTables();
+      // getTables();
     }
   }, [current_schemas])
 
@@ -185,42 +185,39 @@ export const SqlContextProvider = ({ children }: any) => {
     setConnections(conns)
   }
 
-  const getSchemas = async () => {
-    const s = await apiCall('GET', `/api/internal/connections/${current_connection}/schemas/tables`, `limit=${table_limit}`)
-    setSchemas(s)
-  }
+  // const getSchemas = async () => {
+  //   const s = await apiCall('GET', `/api/internal/connections/${current_connection}/schemas/tables`, `limit=${table_limit}`)
+  //   setSchemas(s)
+  // }
 
-  const getTables = async () => {
-    const cur_schemas = filter(schemas, (o) => { return current_schemas.indexOf(o.name) > -1 })
-    if (cur_schemas && cur_schemas.length) {
-      let new_tables: any = []
-      let columns: any = []
-      cur_schemas.forEach((s: any) => {
-        columns.push(apiCall('GET', `/api/internal/connections/${current_connection}/schemas/${s.name}/columns`, `table_limit=${table_limit}`))
-        if (s && s.tables) {
-          s.tables.forEach((t: any) => {
-            new_tables.push({ schema: s.name, ...t })
-          })
-        }
-      })
-      setTables(new_tables)
-      const all_cols = await Promise.all(columns)
-      var merged_tables = []
-      cur_schemas.forEach((s: any, i: number) => {
-        const cur_table: any = all_cols[i];
-        cur_table.forEach((t: any) => {
-          merged_tables.push({ ...t, schema: s.name })
-        })
-      })
-      setColumns(merged_tables)
-    } else {
-      setTables(undefined)
-      setColumns(undefined)
-    }
-
-
-
-  }
+  // const getTables = async () => {
+  //   const cur_schemas = filter(schemas, (o) => { return current_schemas.indexOf(o.name) > -1 })
+  //   if (cur_schemas && cur_schemas.length) {
+  //     let new_tables: any = []
+  //     let columns: any = []
+  //     cur_schemas.forEach((s: any) => {
+  //       columns.push(apiCall('GET', `/api/internal/connections/${current_connection}/schemas/${s.name}/columns`, `table_limit=${table_limit}`))
+  //       if (s && s.tables) {
+  //         s.tables.forEach((t: any) => {
+  //           new_tables.push({ schema: s.name, ...t })
+  //         })
+  //       }
+  //     })
+  //     setTables(new_tables)
+  //     const all_cols = await Promise.all(columns)
+  //     var merged_tables = []
+  //     cur_schemas.forEach((s: any, i: number) => {
+  //       const cur_table: any = all_cols[i];
+  //       cur_table.forEach((t: any) => {
+  //         merged_tables.push({ ...t, schema: s.name })
+  //       })
+  //     })
+  //     setColumns(merged_tables)
+  //   } else {
+  //     setTables(undefined)
+  //     setColumns(undefined)
+  //   }
+  // }
 
   const getColumns = async () => {
     const filtered = filter(columns, (o) => {

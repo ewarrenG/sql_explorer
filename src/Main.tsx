@@ -4,7 +4,11 @@ import { Box } from '@looker/components';
 import styled from 'styled-components'
 import { useHistory, Switch, Route, Redirect } from 'react-router-dom';
 import AppContext from './AppContext'
-import { getAppSearch, apiCall, newSearchUrl, exploreEmbedPath, getFields } from './helpers';
+import {
+  getAppSearch,
+  apiCall,
+  newSearchUrl, exploreEmbedPath, getFields
+} from './helpers';
 import { EmbedSql } from './components/Embed/EmbedSql';
 import { EmbedExplore } from './components/Embed/EmbedExplore';
 import { EmbedDashboard } from './components/Embed';
@@ -28,13 +32,13 @@ export function Main() {
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext);
   const hostUrl = extensionContext?.extensionSDK?.lookerHostData?.hostUrl;
   const sdk = extensionContext.core40SDK;
-  
+
   const { location } = history;
   const pathname = history?.location?.pathname
 
   const app_search_params = getAppSearch(location.search)
-  
-  
+
+
   const [qid, setQid] = useState(app_search_params.qid)
   const [did, setDid] = useState(app_search_params.did)
   const [sql, setSql] = useState(app_search_params.sql)
@@ -52,9 +56,9 @@ export function Main() {
   const [all_favorites, setAllFavorites] = useState<any>();
 
   const [sql_embed_path, setSqlEmbedPath] = useState((app_search_params.sql) ? `/${sql}` : '')
-  
+
   const [qid_embed_path, setQidEmbedPath] = useState((app_search_params.qid) ? exploreEmbedPath(app_search_params.qid, app_search_params.toggle || '') : '')
-  
+
   const [refresh_did, resetRefreshDid, triggerRefreshDid] = refresh(0)
   const [refresh_qid, resetRefreshQid, triggerRefreshQid] = refresh(0)
   const [refresh_lid, resetRefreshLid, triggerRefreshLid] = refresh(0)
@@ -82,35 +86,35 @@ export function Main() {
   }, [])
 
   useEffect(() => {
-    if ( user ) {
+    if (user) {
       runRefreshes();
     }
   }, [user])
 
-  useEffect(()=>{
-    getQid();
-  }, [sql])
+  // useEffect(() => {
+  //   getQid();
+  // }, [sql])
 
-  useEffect(()=>{
+  useEffect(() => {
     if (qid && !qid_embed_path) {
       setQidEmbedPath(exploreEmbedPath(qid, toggle || ''))
     }
   }, [qid])
 
-  useEffect(()=>{
+  useEffect(() => {
     if (did) {
       getDashboard();
     }
   }, [did, refresh_did])
 
-  useEffect(()=>{
+  useEffect(() => {
     if (lid) {
       getLook();
     }
   }, [lid])
 
   const resetSidebarNotification = (route: string) => {
-    const {EMBED_LOOK, EMBED_SQL, EMBED_DASHBOARD, EMBED_EXPLORE} = ROUTES
+    const { EMBED_LOOK, EMBED_SQL, EMBED_DASHBOARD, EMBED_EXPLORE } = ROUTES
     switch (route) {
       case EMBED_SQL:
         resetRefreshSql();
@@ -129,51 +133,51 @@ export function Main() {
 
   const setAppParams = (push_object: any) => {
     const { EMBED_LOOK, EMBED_DASHBOARD, EMBED_SQL, EMBED_EXPLORE } = ROUTES
-    let c = {...push_object}
-    if (c.sql) { 
+    let c = { ...push_object }
+    if (c.sql) {
       setSql(c.sql);
     }
-    if (c.qid) { 
-      setQid(c.qid); 
+    if (c.qid) {
+      setQid(c.qid);
     }
-    if (c.did) { 
-      setDid(c.did); 
+    if (c.did) {
+      setDid(c.did);
     }
-    if (c.lid) { 
-      setLid(c.lid); 
+    if (c.lid) {
+      setLid(c.lid);
     }
     if (c.toggle) { setToggle(c.toggle) }
-    if (c.selection) { 
+    if (c.selection) {
       resetSidebarNotification(c.selection)
-      setSelection(c.selection); 
-      setLastSelection(selection) 
-    } 
+      setSelection(c.selection);
+      setLastSelection(selection)
+    }
     if (c.qid && selection !== EMBED_EXPLORE) { triggerRefreshQid(); }
     if (c.sql && selection !== EMBED_SQL) { triggerRefreshSql(); }
-    if (c.lid && selection !== EMBED_LOOK ) { triggerRefreshLid(); }
-    if (c.did && selection !== EMBED_DASHBOARD ) { triggerRefreshDid(); }
+    if (c.lid && selection !== EMBED_LOOK) { triggerRefreshLid(); }
+    if (c.did && selection !== EMBED_DASHBOARD) { triggerRefreshDid(); }
   }
 
-  useEffect(()=>{
-    let c = {sql, qid, lid, did, selection, toggle}
-    const new_push = selection  + newSearchUrl({sql,did,toggle,lid,qid})
+  useEffect(() => {
+    let c = { sql, qid, lid, did, selection, toggle }
+    const new_push = selection + newSearchUrl({ sql, did, toggle, lid, qid })
     history.push(new_push)
-  },[sql,did,toggle,selection,lid,qid])
+  }, [sql, did, toggle, selection, lid, qid])
 
 
   const getQid = async () => {
-    const { 
-      keep_fields, 
-      keep_sorts, 
-      keep_filters, 
-      keep_vis, 
+    const {
+      keep_fields,
+      keep_sorts,
+      keep_filters,
+      keep_vis,
       keep_dynamic_fields
     } = sql_options
     var current_query;
 
     // get explore definition
-    let explore = apiCall('GET',`${hostUrl}/api/internal/dataflux/explores/sql__${sql}::sql_runner_query`, '', undefined)
-    
+    let explore = Promise.resolve({}); //apiCall('GET',`${hostUrl}/api/internal/dataflux/explores/sql__${sql}::sql_runner_query`, '', undefined)
+
     // get new query slug from sql
     let new_query_from_sql = sdk.ok(sdk.create_query({
       model: `sql__${sql}`,
@@ -186,13 +190,13 @@ export function Main() {
       current_query = new_query_from_sql
     }
 
-    const [e, {id, client_id, slug, ...n}, c] = await Promise.all([explore, new_query_from_sql, current_query])
+    const [e, { id, client_id, slug, ...n }, c] = await Promise.all([explore, new_query_from_sql, current_query])
     // new query body to create
-    let nqb = {...n}
-    
+    let nqb = { ...n }
 
-    let {selected, dynamic_fields} = getFields(e)
-    if (keep_fields) { 
+
+    let { selected, dynamic_fields } = getFields(e)
+    if (keep_fields) {
       nqb['fields'] = (c.fields && c.fields.length) ? c.fields : selected;
       nqb['pivots'] = c.pivots;
     } else {
@@ -206,9 +210,9 @@ export function Main() {
     } else {
       nqb['dynamic_fields'] = JSON.stringify(dynamic_fields || [])
     }
-    
-    const q = await sdk.ok(sdk.create_query(nqb,'client_id'))
-    setAppParams({qid: q.client_id})
+
+    const q = await sdk.ok(sdk.create_query(nqb, 'client_id'))
+    setAppParams({ qid: q.client_id })
     setQidEmbedPath(exploreEmbedPath(q.client_id!, toggle || ''))
   }
 
@@ -226,13 +230,13 @@ export function Main() {
 
   const getAllDashboards = async () => {
     const all_dbs = await sdk.ok(sdk.all_dashboards(DASHBOARD_SEARCH_FIELDS))
-    const no_lookml_dbs = filter(all_dbs, o=>o.folder.name!=='LookML Dashboards')
-    setAllDashboards(sortBy(no_lookml_dbs, ['title','id']))
+    const no_lookml_dbs = filter(all_dbs, o => o.folder.name !== 'LookML Dashboards')
+    setAllDashboards(sortBy(no_lookml_dbs, ['title', 'id']))
   }
 
   const getAllLooks = async () => {
     const all_lks = await sdk.ok(sdk.all_looks(LOOK_SEARCH_FIELDS))
-    setAllLooks(sortBy(all_lks, ['title','id']))
+    setAllLooks(sortBy(all_lks, ['title', 'id']))
   }
 
   const getAllFavorites = async () => {
@@ -240,26 +244,26 @@ export function Main() {
       user_id: user!.id,
       fields: 'dashboard_id,look_id'
     }))
-    const dbs = filter(favorites, function(c){ return c.dashboard_id })
-    const lks = filter(favorites, function(c){ return c.look_id })
+    const dbs = filter(favorites, function (c) { return c.dashboard_id })
+    const lks = filter(favorites, function (c) { return c.look_id })
     let db_list: any = []
     let lk_list: any = []
 
     if (dbs.length) {
       db_list = await sdk.ok(sdk.search_dashboards({
-        id: dbs.map(d=>{return String(d.dashboard_id!)}).join(','),
+        id: dbs.map(d => { return String(d.dashboard_id!) }).join(','),
         fields: DASHBOARD_SEARCH_FIELDS
       }))
-    } 
+    }
 
     if (lks.length) {
       lk_list = await sdk.ok(sdk.search_looks({
-        id: lks.map(l=>{ return String(l.look_id)}).join(','),
+        id: lks.map(l => { return String(l.look_id) }).join(','),
         fields: LOOK_SEARCH_FIELDS
       }))
     }
-    setAllFavorites({dashboards: db_list, looks: lk_list})
-  } 
+    setAllFavorites({ dashboards: db_list, looks: lk_list })
+  }
 
   const getDashboard = async () => {
     const db = await sdk.ok(sdk.dashboard(did))
@@ -277,7 +281,7 @@ export function Main() {
   }
 
   const context = {
-    selection, 
+    selection,
     sql, qid, did, lid, toggle,
     setAppParams,
     runRefreshes,
@@ -294,16 +298,16 @@ export function Main() {
     dashboard, look,
     setDashboard, setLook,
     editing, setEditing
-    
+
   }
-  
+
   return (
     <AppContext.Provider
       value={context}
     >
       <Layout>
         <SqlContextProvider>
-          <Sidebar {...{selection, last_selection, refresh_qid, refresh_did, refresh_sql, refresh_lid, resetSidebarNotification}} />
+          <Sidebar {...{ selection, last_selection, refresh_qid, refresh_did, refresh_sql, refresh_lid, resetSidebarNotification }} />
           <Box >
             <Switch>
               <Route path={"/:selection"}>
@@ -314,11 +318,11 @@ export function Main() {
                 <StyledBox show={(selection === ROUTES.EMBED_EXPLORE)}>
                   <EmbedExplore />
                 </StyledBox>
-                <StyledBox show={(selection === ROUTES.EMBED_DASHBOARD)}>
+                {/* <StyledBox show={(selection === ROUTES.EMBED_DASHBOARD)}>
                   <EmbedDashboard />
-                </StyledBox>
+                </StyledBox> */}
                 <StyledBox show={(selection === ROUTES.EMBED_LOOK)}>
-                  <LookMain 
+                  <LookMain
                     key={`/lid::${lid_iframe_reload}`}
                   />
                 </StyledBox>

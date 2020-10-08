@@ -82,30 +82,30 @@ export const Sidebar: React.FC<any> = ({ selection, last_selection, refresh_qid,
       >
         Explore SQL
           </SidebarMenuItem>
-      {(selection === ROUTES.EMBED_EXPLORE) && <SidebarExplore/> }
+      {(selection === ROUTES.EMBED_EXPLORE) && <SidebarExplore />}
       <SidebarMenuItem
-            route={ROUTES.EMBED_DASHBOARD}
-            refresh={refresh_did}
-            icon="Dashboard"
-          >
-            View Dashboard
+        route={ROUTES.EMBED_DASHBOARD}
+        refresh={refresh_did}
+        icon="Dashboard"
+      >
+        View Dashboard
           </SidebarMenuItem>
-      {(selection === ROUTES.EMBED_DASHBOARD) && <SidebarDashboard /> }
+      {(selection === ROUTES.EMBED_DASHBOARD) && <SidebarDashboard />} */}
       <SidebarMenuItem
-            route={ROUTES.EMBED_LOOK}
-            refresh={refresh_lid}
-            icon="Reports"
-          >
-            View Look
+        route={ROUTES.EMBED_LOOK}
+        refresh={refresh_lid}
+        icon="Reports"
+      >
+        View Look
           </SidebarMenuItem>
-      {(selection === ROUTES.EMBED_LOOK) && <SidebarLook /> }
-      { editing && <SidebarEditing /> }
+      {(selection === ROUTES.EMBED_LOOK) && <SidebarLook />}
+      {/* {editing && <SidebarEditing />}
       <SidebarMenuItem
-            route={ROUTES.HELP}
-            refresh={0}
-            icon="Help"
-          >
-            Help
+        route={ROUTES.HELP}
+        refresh={0}
+        icon="Help"
+      >
+        Help
           </SidebarMenuItem> */}
     </Box>
   )
