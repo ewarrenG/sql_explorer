@@ -15,6 +15,9 @@ export function SqlResults() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const targetRef = useRef()
 
+  console.log({ results })
+  console.log({ big_query_metadata_results })
+
 
   useLayoutEffect(() => {
     if (targetRef?.current) {
@@ -63,50 +66,50 @@ export function SqlResults() {
               <Heading>Metadata from BigQuery</Heading>
             </FlexItem>
 
-            <FlexItem>
-              {/* //pull out job_id, state, total_bytes_processed, total_bytes_billed, total_slot_ms */}
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableHeaderCell>Metadata</TableHeaderCell>
-                    <TableHeaderCell>Value</TableHeaderCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableDataCell>job_id</TableDataCell>
-                    <TableDataCell>{big_query_metadata_results.data[0].job_id.value}</TableDataCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableDataCell>state</TableDataCell>
-                    <TableDataCell>{big_query_metadata_results.data[0].state.value}</TableDataCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableDataCell>total_bytes_processed</TableDataCell>
-                    <TableDataCell>{big_query_metadata_results.data[0].total_bytes_processed.value}</TableDataCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableDataCell>total_bytes_billed</TableDataCell>
-                    <TableDataCell>{big_query_metadata_results.data[0].total_bytes_billed.value}</TableDataCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableDataCell>total_slot_ms</TableDataCell>
-                    <TableDataCell>{big_query_metadata_results.data[0].total_slot_ms.value}</TableDataCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+            {/* //pull out job_id, state, total_bytes_processed, total_bytes_billed, total_slot_ms */}
+            {/* <FlexItem>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableHeaderCell>Metadata</TableHeaderCell>
+                  <TableHeaderCell>Value</TableHeaderCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableDataCell>job_id</TableDataCell>
+                  <TableDataCell>{big_query_metadata_results.data[0].job_id.value}</TableDataCell>
+                </TableRow>
+                <TableRow>
+                  <TableDataCell>state</TableDataCell>
+                  <TableDataCell>{big_query_metadata_results.data[0].state.value}</TableDataCell>
+                </TableRow>
+                <TableRow>
+                  <TableDataCell>total_bytes_processed</TableDataCell>
+                  <TableDataCell>{big_query_metadata_results.data[0].total_bytes_processed.value}</TableDataCell>
+                </TableRow>
+                <TableRow>
+                  <TableDataCell>total_bytes_billed</TableDataCell>
+                  <TableDataCell>{big_query_metadata_results.data[0].total_bytes_billed.value}</TableDataCell>
+                </TableRow>
+                <TableRow>
+                  <TableDataCell>total_slot_ms</TableDataCell>
+                  <TableDataCell>{big_query_metadata_results.data[0].total_slot_ms.value}</TableDataCell>
+                </TableRow>
+              </TableBody>
+            </Table>
             </FlexItem>
 
-            <Accordion>
-              <AccordionDisclosure>See full response</AccordionDisclosure>
-              <AccordionContent>
-                <FlexItem height="500px">
-                  <TextArea
-                    style={{ height: '100%', minHeight: "500px" }}
-                    value={big_query_metadata_results ? JSON.stringify(big_query_metadata_results.data[0], undefined, 4) : 'Processing...'}>
-                  </TextArea>
-                </FlexItem></AccordionContent>
-            </Accordion>
+          <Accordion>
+            <AccordionDisclosure>See full response</AccordionDisclosure>
+            <AccordionContent>
+              <FlexItem height="500px">
+                <TextArea
+                  style={{ height: '100%', minHeight: "500px" }}
+                  value={big_query_metadata_results ? JSON.stringify(big_query_metadata_results.data[0], undefined, 4) : 'Processing...'}>
+                </TextArea>
+              </FlexItem></AccordionContent>
+          </Accordion> * /}
 
 
             {/* doesn't work */}
@@ -114,6 +117,10 @@ export function SqlResults() {
               <Paragraph>
                 <CodeBlock>{exampleText}</CodeBlock></Paragraph>
             </FlexItem > */}
+
+            <FlexItem>
+              {JSON.stringify(big_query_metadata_results)}
+            </FlexItem>
 
           </Flex > :
           <Flex justifyContent="center" mb="medium">

@@ -14,7 +14,8 @@ import AppContext from '../../AppContext';
 export function SqlQueries() {
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.coreSDK
-  const { use_model, setUseModel, current_tables, selected_query, setSelectedQuery, setWrittenSql, setResults, setBigQueryMetadataResults } = useContext(SqlContext)
+  const { use_model, setUseModel, current_tables, selected_query, setSelectedQuery, setWrittenSql, setResults, setBigQueryMetadataResults,
+    written_sql } = useContext(SqlContext)
   const { setAppParams } = useContext(AppContext)
 
 
@@ -25,79 +26,100 @@ export function SqlQueries() {
    * when 
    */
 
+  ///ooolllldddd
+  // const dropdownSqlQueries = [{
+  //   value: `SELECT order_items.status  AS order_items_status, 
+  //   COUNT(*) AS order_items_count 
+  //   FROM looker-private-demo.ecomm.order_items  AS order_items 
+  //   WHERE (((order_items.created_at ) >= ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY)), 'America/Los_Angeles'))) 
+  //   AND (order_items.created_at ) < ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY), INTERVAL 30 DAY)), 'America/Los_Angeles'))))) 
+  //   GROUP BY 1 
+  //   ORDER BY 2 DESC 
+  //   LIMIT 500`,
+  //   label: "Count of Orders by Status",
+  //   lid: 205
+  // }, {
+  //   value: `SELECT CAST(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', order_items.created_at , 'America/Los_Angeles')) AS DATE) AS order_items_created_date, 
+  //   COALESCE(SUM((order_items.sale_price - inventory_items.cost) ), 0) AS order_items_total_gross_margin, 
+  //   COALESCE(SUM(order_items.sale_price ), 0) AS order_items_total_sale_price 
+  //   FROM looker-private-demo.ecomm.order_items  AS order_items 
+  //   FULL OUTER JOIN looker-private-demo.ecomm.inventory_items  AS inventory_items 
+  //   ON inventory_items.id = order_items.inventory_item_id 
+  //   LEFT JOIN looker-private-demo.ecomm.products  AS products 
+  //   ON products.id = inventory_items.product_id 
+  //   WHERE ((((order_items.created_at ) >= ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY)), 'America/Los_Angeles'))) 
+  //   AND (order_items.created_at ) < ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY), INTERVAL 30 DAY)), 'America/Los_Angeles')))))) 
+  //   AND (((TRIM(products.brand)) = 'Levi\\'s')) GROUP BY 1 ORDER BY 1 DESC LIMIT 500`,
+  //   label: "Gross Margin vs Sales Price",
+  //   lid: 204
+  // }, {
+  //   value: `SELECT TRIM(products.brand)  AS products_brand, 
+  //   TRIM(products.department)  AS products_department, 
+  //   COALESCE(SUM((order_items.sale_price - inventory_items.cost) ), 0) AS order_items_total_gross_margin 
+  //   FROM looker-private-demo.ecomm.order_items  AS order_items 
+  //   FULL OUTER JOIN looker-private-demo.ecomm.inventory_items  AS inventory_items 
+  //   ON inventory_items.id = order_items.inventory_item_id 
+  //   LEFT JOIN looker-private-demo.ecomm.products  AS products 
+  //   ON products.id = inventory_items.product_id 
+  //   WHERE (((order_items.created_at ) >= ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY)), 'America/Los_Angeles'))) 
+  //   AND (order_items.created_at ) < ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY), INTERVAL 30 DAY)), 'America/Los_Angeles'))))) 
+  //   GROUP BY 1,2 
+  //   ORDER BY 3 DESC 
+  //   LIMIT 5`,
+  //   label: "Top 10 Ordered Items",
+  //   lid: 207
+  // }, {
+  //   value: `SELECT TRIM(products.name)  AS products_item_name, 
+  //   COUNT(DISTINCT order_items.order_id ) AS order_items_order_count 
+  //   FROM looker-private-demo.ecomm.order_items  AS order_items 
+  //   FULL OUTER JOIN looker-private-demo.ecomm.inventory_items  AS inventory_items 
+  //   ON inventory_items.id = order_items.inventory_item_id 
+  //   LEFT JOIN looker-private-demo.ecomm.products  AS products 
+  //   ON products.id = inventory_items.product_id 
+  //   WHERE (((order_items.created_at ) >= ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY)), 'America/Los_Angeles'))) 
+  //   AND (order_items.created_at ) < ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY), INTERVAL 30 DAY)), 'America/Los_Angeles'))))) 
+  //   GROUP BY 1 
+  //   ORDER BY 2 DESC 
+  //   LIMIT 20`,
+  //   label: "Top by Grossing Brands",
+  //   lid: 206
+  // }
+  // ];
+
   const dropdownSqlQueries = [{
-    value: `SELECT order_items.status  AS order_items_status, 
-    COUNT(*) AS order_items_count 
-    FROM looker-private-demo.ecomm.order_items  AS order_items 
-    WHERE (((order_items.created_at ) >= ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY)), 'America/Los_Angeles'))) 
-    AND (order_items.created_at ) < ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY), INTERVAL 30 DAY)), 'America/Los_Angeles'))))) 
-    GROUP BY 1 
-    ORDER BY 2 DESC 
-    LIMIT 500`,
-    label: "Count of Orders by Status",
-    lid: 205
+    label: "Total views",
+    value: `SELECT wiki, SUM(views) 
+    FROM lookerdata.bq_showcase.wikipedia_v3_partition
+    WHERE DATE(datehour) = "2019-01-01" GROUP BY 1 LIMIT 1000`,
+    // lid: 205
   }, {
-    value: `SELECT CAST(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', order_items.created_at , 'America/Los_Angeles')) AS DATE) AS order_items_created_date, 
-    COALESCE(SUM((order_items.sale_price - inventory_items.cost) ), 0) AS order_items_total_gross_margin, 
-    COALESCE(SUM(order_items.sale_price ), 0) AS order_items_total_sale_price 
-    FROM looker-private-demo.ecomm.order_items  AS order_items 
-    FULL OUTER JOIN looker-private-demo.ecomm.inventory_items  AS inventory_items 
-    ON inventory_items.id = order_items.inventory_item_id 
-    LEFT JOIN looker-private-demo.ecomm.products  AS products 
-    ON products.id = inventory_items.product_id 
-    WHERE ((((order_items.created_at ) >= ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY)), 'America/Los_Angeles'))) 
-    AND (order_items.created_at ) < ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY), INTERVAL 30 DAY)), 'America/Los_Angeles')))))) 
-    AND (((TRIM(products.brand)) = 'Levi\\'s')) GROUP BY 1 ORDER BY 1 DESC LIMIT 500`,
-    label: "Gross Margin vs Sales Price",
-    lid: 204
-  }, {
-    value: `SELECT TRIM(products.brand)  AS products_brand, 
-    TRIM(products.department)  AS products_department, 
-    COALESCE(SUM((order_items.sale_price - inventory_items.cost) ), 0) AS order_items_total_gross_margin 
-    FROM looker-private-demo.ecomm.order_items  AS order_items 
-    FULL OUTER JOIN looker-private-demo.ecomm.inventory_items  AS inventory_items 
-    ON inventory_items.id = order_items.inventory_item_id 
-    LEFT JOIN looker-private-demo.ecomm.products  AS products 
-    ON products.id = inventory_items.product_id 
-    WHERE (((order_items.created_at ) >= ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY)), 'America/Los_Angeles'))) 
-    AND (order_items.created_at ) < ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY), INTERVAL 30 DAY)), 'America/Los_Angeles'))))) 
-    GROUP BY 1,2 
-    ORDER BY 3 DESC 
-    LIMIT 5`,
-    label: "Top 10 Ordered Items",
-    lid: 207
-  }, {
-    value: `SELECT TRIM(products.name)  AS products_item_name, 
-    COUNT(DISTINCT order_items.order_id ) AS order_items_order_count 
-    FROM looker-private-demo.ecomm.order_items  AS order_items 
-    FULL OUTER JOIN looker-private-demo.ecomm.inventory_items  AS inventory_items 
-    ON inventory_items.id = order_items.inventory_item_id 
-    LEFT JOIN looker-private-demo.ecomm.products  AS products 
-    ON products.id = inventory_items.product_id 
-    WHERE (((order_items.created_at ) >= ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY)), 'America/Los_Angeles'))) 
-    AND (order_items.created_at ) < ((TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', TIMESTAMP_ADD(TIMESTAMP_ADD(TIMESTAMP_TRUNC(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', CURRENT_TIMESTAMP(), 'America/Los_Angeles')), DAY), INTERVAL -29 DAY), INTERVAL 30 DAY)), 'America/Los_Angeles'))))) 
-    GROUP BY 1 
-    ORDER BY 2 DESC 
-    LIMIT 20`,
-    label: "Top by Grossing Brands",
-    lid: 206
-  }
-  ];
+    label: "Total views",
+    value: `SELECT wiki, SUM(views) 
+    FROM lookerdata.bq_showcase.wikipedia_v3_non_partition
+    WHERE DATE(datehour) = "2019-01-01" GROUP BY 1 LIMIT 1000`,
+    // lid: 205
+  }];
 
 
   useEffect(() => {
     if (!selected_query) {
-      setSelectedQuery(dropdownSqlQueries[0].value)
       setSelectedQuery(dropdownSqlQueries[0].value)
       setAppParams({ lid: dropdownSqlQueries[0].lid })
     }
   }, []);
 
   useEffect(() => {
-    setWrittenSql(selected_query ? selected_query : '')
+    // setWrittenSql(selected_query ? selected_query : '')
+    console.log({ selected_query })
+    setWrittenSql(selected_query ? { "partitioned": selected_query, "non-partitioned": selected_query.replace("partition", "non_partition") } : {})
     setResults('')
     setBigQueryMetadataResults('')
   }, [selected_query])
+
+  useEffect(() => {
+    console.log({ written_sql })
+
+  }, [written_sql])
 
 
   return (

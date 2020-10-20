@@ -54,7 +54,7 @@ export const SqlContextProvider = ({ children }: any) => {
   const [written_sql, setWrittenSql] = useState() //need
   const [running, setRunning] = useState(false)
   const [models, setModels] = useState()
-  const [current_connection, setCurrentConnection] = useState('looker-private-demo') //need
+  const [current_connection, setCurrentConnection] = useState('lookerdata');//useState('looker-private-demo') //need
   const [current_model, setCurrentModel] = useState()
   const [use_model, setUseModel] = useState(false)
   const [update_prepared, setUpdatePrepared] = useState(true)
@@ -65,10 +65,10 @@ export const SqlContextProvider = ({ children }: any) => {
   const [columns, setColumns] = useState()
   const [current_columns, setCurrentColumns] = useState()
   const [table_limit, setTableLimit] = useState(500)
-  const [results, setResults] = useState()
+  const [results, setResults] = useState({})
   const [selected_query, setSelectedQuery] = useState()
-  const [big_query_metadata_results, setBigQueryMetadataResults] = useState()
-  const [initial_query_id, setInitialQueryId] = useState()
+  const [big_query_metadata_results, setBigQueryMetadataResults] = useState({})
+  const [initial_query_id, setInitialQueryId] = useState({})
 
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.core40SDK
@@ -163,11 +163,6 @@ export const SqlContextProvider = ({ children }: any) => {
   // useEffect(() => {
   //   console.log('big_query_metadata_results', big_query_metadata_results)
   // }, [big_query_metadata_results])
-  useEffect(() => {
-    if (initial_query_id) {
-      handleConnectionRun()
-    }
-  }, [initial_query_id])
 
   const getSql = async () => {
     const s = await sdk.ok(sdk.sql_query(sql))
@@ -235,27 +230,69 @@ export const SqlContextProvider = ({ children }: any) => {
 
   const handleRun = () => {
     // console.log('run', { use_model })
+    let partitionedNonPartitionedArr = ["partitioned", "non-partitioned"];
     if (use_model) {
       handleModelRun();
     } else {
       // handleConnectionRun();
       setRunning(true)
-      setInitialQueryId(Math.random().toString(16).slice(2, 10))
+      // setInitialQueryId(Math.random().toString(16).slice(2, 10))
+      setInitialQueryId({
+        "partitioned": Math.random().toString(16).slice(2, 10),
+        "non-partitioned": Math.random().toString(16).slice(2, 10)
+      })
     }
   }
 
-  const handleConnectionRun = async () => {
-    // console.log('handleConnectionRun')
+
+  useEffect(() => {
+    console.log({ initial_query_id })
+    if (Object.keys(initial_query_id).length) {
+      Promise.all(Object.keys(initial_query_id).map(async key => {
+        console.log({ key })
+        await handleConnectionRun(key)
+      }))
+      console.log('after mappp')
+    }
+    // handleConnectionRun()
+  }, [initial_query_id])
+
+  useEffect(() => {
+    console.log({ initial_query_id })
+    console.log({ big_query_metadata_results })
+    if (Object.keys(initial_query_id).length === Object.keys(big_query_metadata_results).length) {
+      setRunning(false)
+    }
+  }, [big_query_metadata_results])
+
+
+  const handleConnectionRun = async (partitioned) => {
+    console.log('handleConnectionRun')
+    console.log('partitioned', partitioned)
+    console.log({ written_sql })
+    console.log({ initial_query_id })
+    console.log(written_sql[partitioned])
+    console.log(initial_query_id[partitioned])
     // console.log({ t: 'connection', current_connection, written_sql })
     // start of initial query
+
     const s = await sdk.ok(sdk.create_sql_query({
       connection_name: current_connection,
-      sql: `/* ${initial_query_id}*/` + written_sql
+      sql: `/* ${initial_query_id[partitioned]}*/` + written_sql[partitioned]
     }))
     if (s?.slug) {
       const r = await sdk.ok(sdk.run_sql_query(s.slug, 'json_detail'));
       // console.log('r', r)
-      setResults(r);
+      /**
+       * setItems([
+      ...items,
+      {
+        id: items.length,
+        name: itemName
+      }
+    ]);
+       */
+      setResults({ ...results, [partitioned]: r });
       if (r?.data?.length) {
         const qid = await getQid(s.slug, r)
         setAppParams({
@@ -279,7 +316,7 @@ export const SqlContextProvider = ({ children }: any) => {
 
     const sqlForBigQueryMetadata = `SELECT * FROM ${current_connection}.\`region-us\`.INFORMATION_SCHEMA.JOBS_BY_USER WHERE lower(query) 
     LIKE '%${me.id}%' 
-    AND lower(query) LIKE '%${initial_query_id}%' 
+    AND lower(query) LIKE '%${initial_query_id[partitioned]}%' 
     AND timestamp_diff(current_timestamp(), creation_time, minute) <= 1 
     ORDER BY creation_time DESC LIMIT 1`;
 
@@ -290,9 +327,10 @@ export const SqlContextProvider = ({ children }: any) => {
     }))
     if (bigQueryMetadataQuery?.slug) {
       const bigQueryMetadataResponse = await sdk.ok(sdk.run_sql_query(bigQueryMetadataQuery.slug, 'json_detail'));
-      setBigQueryMetadataResults(bigQueryMetadataResponse)
+      setBigQueryMetadataResults({ ...big_query_metadata_results, [partitioned]: bigQueryMetadataResponse })
     }
-    setRunning(false);
+
+    // setRunning(false);
   }
 
   const handleModelRun = async () => {

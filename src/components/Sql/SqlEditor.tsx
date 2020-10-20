@@ -78,7 +78,7 @@ export function SqlEditor() {
         showPrintMargin={false}
         showGutter={false}
         highlightActiveLine={true}
-        value={written_sql}
+        value={written_sql && written_sql.partitioned ? written_sql.partitioned : ''}
         // @ts-ignore
         enableBasicAutocompletion={[completerFunction(completers)]}
         enableLiveAutocompletion
