@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { apiCall, exploreEmbedPath, getFields } from '../../helpers';
+import { apiCall, exploreEmbedPath, getFields, app_search_params } from '../../helpers';
 import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
 import AppContext from '../../AppContext';
 import { sortBy, find, filter } from 'lodash';
@@ -244,92 +244,162 @@ export const SqlContextProvider = ({ children }: any) => {
     }
   }
 
+  /***
+   * const handleRunConnection = (id) => {
+	return new Promise((async (resolve, reject)=>{
+    	const x = await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`)
+      const y = await x.json()
+      resolve(JSON.stringify(y))
+  }))
+}
+const funky = async () => {
+  var update = ''
+  var ids = [1,2]
+  var arr = []
+  ids.forEach( (id)=>{
+    arr.push(	
+      handleRunConnection(id)
+    )
+  });
+	var arr_prom = await Promise.all(arr)
+	var new_update = arr_prom.join(', ')
+ document.getElementById('hi').innerHTML = new_update
+}
+funky();
+   */
 
+
+  //initial_query_id used to be single string
+
+  /**
+   * initial_query_id:
+non-partitioned: "4e5c46cc"
+partitioned: "f44583ac"
+   */
+
+  /**
+   * written_sql:
+non-partitioned: "SELECT wiki, SUM(views) ↵    FROM lookerdata.bq_showcase.wikipedia_v3_non_partition↵    WHERE DATE(datehour) = "2019-01-01" GROUP BY 1 LIMIT 1000"
+partitioned: "SELECT wiki, SUM(views) ↵    FROM lookerdata.bq_showcase.wikipedia_v3_partition↵    WHERE DATE(datehour) = "2019-01-01" GROUP BY 1 LIMIT 1000"
+
+   */
   useEffect(() => {
     console.log({ initial_query_id })
+
     if (Object.keys(initial_query_id).length) {
-      Promise.all(Object.keys(initial_query_id).map(async key => {
-        console.log({ key })
-        await handleConnectionRun(key)
-      }))
-      console.log('after mappp')
+      let handleConnectionRunArr = [];
+      async function fetchData() {
+        Object.keys(initial_query_id).map(key => {
+          handleConnectionRunArr.push(handleConnectionRun(key))
+        })
+        var arr_prom = await Promise.all(handleConnectionRunArr)
+
+
+        // console.log('arr_prom[0]["partitioned"]["results"]', arr_prom[0]["partitioned"]["results"])
+        // console.log('arr_prom[0]["partitioned"]["big_query_metadata_results"]', arr_prom[0]["partitioned"]["big_query_metadata_results"])
+        // console.log('arr_prom[1]["non-partitioned"]["results"]', arr_prom[1]["non-partitioned"]["results"])
+        // console.log('arr_prom[1]["non-partitioned"]["big_query_metadata_results"]', arr_prom[1]["non-partitioned"]["big_query_metadata_results"])
+
+        setResults({
+          "partitioned": arr_prom[0]["partitioned"]["results"],
+          "non-partitioned": arr_prom[1]["non-partitioned"]["results"]
+        })
+        setBigQueryMetadataResults({
+          "partitioned": arr_prom[0]["partitioned"]["big_query_metadata_results"],
+          "non-partitioned": arr_prom[1]["non-partitioned"]["big_query_metadata_results"]
+        })
+
+        setAppParams({
+          sql: arr_prom[0]["partitioned"]["app_params"]["sql"],
+          qid: arr_prom[0]["partitioned"]["app_params"]["qid"]
+        })
+
+        setRunning(false)
+
+      }
+      fetchData()
     }
-    // handleConnectionRun()
   }, [initial_query_id])
 
-  useEffect(() => {
-    console.log({ initial_query_id })
-    console.log({ big_query_metadata_results })
-    if (Object.keys(initial_query_id).length === Object.keys(big_query_metadata_results).length) {
-      setRunning(false)
-    }
-  }, [big_query_metadata_results])
 
 
-  const handleConnectionRun = async (partitioned) => {
-    console.log('handleConnectionRun')
-    console.log('partitioned', partitioned)
-    console.log({ written_sql })
-    console.log({ initial_query_id })
-    console.log(written_sql[partitioned])
-    console.log(initial_query_id[partitioned])
+
+
+
+  const handleConnectionRun = (partitionedKey) => { //partitioned
+    // console.log('handleConnectionRun')
+    // console.log('partitionedKey', partitionedKey)
     // console.log({ t: 'connection', current_connection, written_sql })
+    // console.log({ written_sql })
+    // console.log({ initial_query_id })
     // start of initial query
 
-    const s = await sdk.ok(sdk.create_sql_query({
-      connection_name: current_connection,
-      sql: `/* ${initial_query_id[partitioned]}*/` + written_sql[partitioned]
-    }))
-    if (s?.slug) {
-      const r = await sdk.ok(sdk.run_sql_query(s.slug, 'json_detail'));
-      // console.log('r', r)
-      /**
-       * setItems([
-      ...items,
-      {
-        id: items.length,
-        name: itemName
+
+    return new Promise((async (resolve, reject) => {
+      let returnObj = {
+        "non-partitioned": {
+          "results": {},
+          "big_query_metadata_results": {
+          },
+          "app_params": {
+            "sql": "",
+            "qid": ""
+          }
+        },
+        "partitioned": {
+          "results": {},
+          "big_query_metadata_results": {
+          },
+          "app_params": {
+            "sql": "",
+            "qid": ""
+          }
+        }
       }
-    ]);
-       */
-      setResults({ ...results, [partitioned]: r });
-      if (r?.data?.length) {
-        const qid = await getQid(s.slug, r)
-        setAppParams({
-          sql: s.slug,
-          qid: qid
-        })
-      } else {
 
+      const s = await sdk.ok(sdk.create_sql_query({
+        connection_name: current_connection,
+        sql: `/* ${initial_query_id[partitionedKey]}*/` + written_sql[partitionedKey]
+      }))
+      if (s?.slug) {
+        const r = await sdk.ok(sdk.run_sql_query(s.slug, 'json_detail'));
+
+        returnObj[partitionedKey]["results"] = r
+
+        if (r?.data?.length) {
+          const qid = await getQid(s.slug, r)
+          returnObj[partitionedKey]["app_params"] = {
+            sql: s.slug,
+            qid: qid
+          }
+        } else {
+
+        }
       }
-    }
 
-    // get user id for metadata query
-    const me = await sdk.ok(sdk.me())
+      // get user id for metadata query
+      const me = await sdk.ok(sdk.me())
 
-    // const sqlForBigQueryMetadata = `SELECT * FROM ${current_connection}.\`region-us\`.INFORMATION_SCHEMA.JOBS_BY_USER WHERE lower(query) 
-    // LIKE '%${me.id}%' 
-    // AND lower(query) LIKE '%${written_sql.toLowerCase()}%' 
-    // AND timestamp_diff(current_timestamp(), creation_time, minute) <= 1 
-    // ORDER BY creation_time DESC LIMIT 1`;
-
-
-    const sqlForBigQueryMetadata = `SELECT * FROM ${current_connection}.\`region-us\`.INFORMATION_SCHEMA.JOBS_BY_USER WHERE lower(query) 
-    LIKE '%${me.id}%' 
-    AND lower(query) LIKE '%${initial_query_id[partitioned]}%' 
-    AND timestamp_diff(current_timestamp(), creation_time, minute) <= 1 
-    ORDER BY creation_time DESC LIMIT 1`;
+      const sqlForBigQueryMetadata = `SELECT * FROM ${current_connection}.\`region-us\`.INFORMATION_SCHEMA.JOBS_BY_USER WHERE lower(query) 
+      LIKE '%${me.id}%' 
+      AND lower(query) LIKE '%${initial_query_id[partitionedKey]}%' 
+      AND timestamp_diff(current_timestamp(), creation_time, minute) <= 1 
+      ORDER BY creation_time DESC LIMIT 1`;
 
 
-    const bigQueryMetadataQuery = await sdk.ok(sdk.create_sql_query({
-      connection_name: current_connection,
-      sql: sqlForBigQueryMetadata
+      const bigQueryMetadataQuery = await sdk.ok(sdk.create_sql_query({
+        connection_name: current_connection,
+        sql: sqlForBigQueryMetadata
+      }))
+
+      if (bigQueryMetadataQuery?.slug) {
+        const bigQueryMetadataResponse = await sdk.ok(sdk.run_sql_query(bigQueryMetadataQuery.slug, 'json_detail'));
+        returnObj[partitionedKey]["big_query_metadata_results"] = bigQueryMetadataResponse
+      }
+
+      resolve(returnObj)
     }))
-    if (bigQueryMetadataQuery?.slug) {
-      const bigQueryMetadataResponse = await sdk.ok(sdk.run_sql_query(bigQueryMetadataQuery.slug, 'json_detail'));
-      setBigQueryMetadataResults({ ...big_query_metadata_results, [partitioned]: bigQueryMetadataResponse })
-    }
-
+    // console.log('bottom of handleConnectionRun')
     // setRunning(false);
   }
 

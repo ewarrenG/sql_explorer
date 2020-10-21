@@ -15,8 +15,8 @@ export function SqlResults() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const targetRef = useRef()
 
-  console.log({ results })
-  console.log({ big_query_metadata_results })
+  // console.log({ results })
+  // console.log({ big_query_metadata_results })
 
 
   useLayoutEffect(() => {
@@ -54,72 +54,70 @@ export function SqlResults() {
     })
   }
 
+  const metadataValuesOfInterest = ["job_id", "creation_time", "end_time"];
+
   return (
     <Box my="xxxlarge" mx="large" height="100%">
       {running ?
 
         <Flex justifyContent="center" mb="medium" >
           <Spinner></Spinner>
-        </Flex> : big_query_metadata_results?.data?.length ?
+        </Flex> : Object.keys(big_query_metadata_results).length ?
           <Flex flexDirection="column" height="100%">
             <FlexItem>
               <Heading>Metadata from BigQuery</Heading>
             </FlexItem>
 
             {/* //pull out job_id, state, total_bytes_processed, total_bytes_billed, total_slot_ms */}
-            {/* <FlexItem>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableHeaderCell>Metadata</TableHeaderCell>
-                  <TableHeaderCell>Value</TableHeaderCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableDataCell>job_id</TableDataCell>
-                  <TableDataCell>{big_query_metadata_results.data[0].job_id.value}</TableDataCell>
-                </TableRow>
-                <TableRow>
-                  <TableDataCell>state</TableDataCell>
-                  <TableDataCell>{big_query_metadata_results.data[0].state.value}</TableDataCell>
-                </TableRow>
-                <TableRow>
-                  <TableDataCell>total_bytes_processed</TableDataCell>
-                  <TableDataCell>{big_query_metadata_results.data[0].total_bytes_processed.value}</TableDataCell>
-                </TableRow>
-                <TableRow>
-                  <TableDataCell>total_bytes_billed</TableDataCell>
-                  <TableDataCell>{big_query_metadata_results.data[0].total_bytes_billed.value}</TableDataCell>
-                </TableRow>
-                <TableRow>
-                  <TableDataCell>total_slot_ms</TableDataCell>
-                  <TableDataCell>{big_query_metadata_results.data[0].total_slot_ms.value}</TableDataCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-            </FlexItem>
-
-          <Accordion>
-            <AccordionDisclosure>See full response</AccordionDisclosure>
-            <AccordionContent>
-              <FlexItem height="500px">
-                <TextArea
-                  style={{ height: '100%', minHeight: "500px" }}
-                  value={big_query_metadata_results ? JSON.stringify(big_query_metadata_results.data[0], undefined, 4) : 'Processing...'}>
-                </TextArea>
-              </FlexItem></AccordionContent>
-          </Accordion> * /}
-
-
-            {/* doesn't work */}
-            {/* <FlexItem>
-              <Paragraph>
-                <CodeBlock>{exampleText}</CodeBlock></Paragraph>
-            </FlexItem > */}
 
             <FlexItem>
-              {JSON.stringify(big_query_metadata_results)}
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableHeaderCell>Metadata</TableHeaderCell>
+                    <TableHeaderCell>Parition Value</TableHeaderCell>
+                    <TableHeaderCell>Non-Parition Value</TableHeaderCell>
+                  </TableRow>
+                </TableHead>
+
+
+
+
+                <TableBody>
+
+                  <TableRow>
+                    <TableDataCell>original sql</TableDataCell>
+                    <TableDataCell>{results["partitioned"].sql}</TableDataCell>
+                    <TableDataCell>{results["non-partitioned"].sql}</TableDataCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableDataCell>INFORMATION_SCHEMA sql</TableDataCell>
+                    <TableDataCell>{big_query_metadata_results["partitioned"].sql}</TableDataCell>
+                    <TableDataCell>{big_query_metadata_results["non-partitioned"].sql}</TableDataCell>
+                  </TableRow>
+
+                  {metadataValuesOfInterest.map(item => {
+                    return (
+                      <TableRow>
+                        <TableDataCell>{item}</TableDataCell>
+                        <TableDataCell>{big_query_metadata_results["partitioned"].data[0][item]["value"]}</TableDataCell>
+                        <TableDataCell>{big_query_metadata_results["non-partitioned"].data[0][item]["value"]}</TableDataCell>
+                      </TableRow>)
+                  })}
+
+                  <TableRow>
+                    <TableDataCell>run_time (seconds)</TableDataCell>
+                    <TableDataCell>{
+                      (Math.abs(Date.parse(big_query_metadata_results["partitioned"].data[0]["end_time"]["value"])
+                        - Date.parse(big_query_metadata_results["partitioned"].data[0]["creation_time"]["value"])) / 1000).toFixed(2)
+                    }</TableDataCell>
+                    <TableDataCell>{
+                      (Math.abs(Date.parse(big_query_metadata_results["non-partitioned"].data[0]["end_time"]["value"])
+                        - Date.parse(big_query_metadata_results["non-partitioned"].data[0]["creation_time"]["value"])) / 1000).toFixed(2)
+                    }</TableDataCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </FlexItem>
 
           </Flex > :
