@@ -11,12 +11,12 @@ import { throttle } from 'lodash';
 const FONT_SIZE = 'xsmall'
 
 export function SqlResults() {
-  const { results, big_query_metadata_results, running } = useContext(SqlContext)
+  const { results, big_query_metadata_results, running, partitioned_results, non_partitioned_results } = useContext(SqlContext)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const targetRef = useRef()
 
-  // console.log({ results })
-  // console.log({ big_query_metadata_results })
+  // console.log({ partitioned_results })
+  // console.log({ non_partitioned_results })
 
 
   useLayoutEffect(() => {
@@ -62,13 +62,16 @@ export function SqlResults() {
 
         <Flex justifyContent="center" mb="medium" >
           <Spinner></Spinner>
-        </Flex> : Object.keys(big_query_metadata_results).length ?
+        </Flex> : Object.keys(partitioned_results).length || Object.keys(non_partitioned_results).length ?
           <Flex flexDirection="column" height="100%">
             <FlexItem>
               <Heading>Metadata from BigQuery</Heading>
             </FlexItem>
 
             {/* //pull out job_id, state, total_bytes_processed, total_bytes_billed, total_slot_ms */}
+            {/* $5 per tb of data processed */}
+            {/* need to do this calc to show cost */}
+
 
             <FlexItem>
               <Table>
@@ -80,40 +83,42 @@ export function SqlResults() {
                   </TableRow>
                 </TableHead>
 
-
-
-
                 <TableBody>
-
                   <TableRow>
-                    <TableDataCell>original sql</TableDataCell>
-                    <TableDataCell>{results["partitioned"].sql}</TableDataCell>
-                    <TableDataCell>{results["non-partitioned"].sql}</TableDataCell>
+                    <TableDataCell>INFORMATION_SCHEMA sql</TableDataCell>
+                    <TableDataCell>{Object.keys(partitioned_results).length ? partitioned_results.results.sql : "processing"}</TableDataCell>
+                    <TableDataCell>{Object.keys(non_partitioned_results).length ? non_partitioned_results.results.sql : "processing"}</TableDataCell>
                   </TableRow>
                   <TableRow>
                     <TableDataCell>INFORMATION_SCHEMA sql</TableDataCell>
-                    <TableDataCell>{big_query_metadata_results["partitioned"].sql}</TableDataCell>
-                    <TableDataCell>{big_query_metadata_results["non-partitioned"].sql}</TableDataCell>
+                    <TableDataCell>{Object.keys(partitioned_results).length ? partitioned_results.big_query_metadata_results.sql : "processing"}</TableDataCell>
+                    <TableDataCell>{Object.keys(non_partitioned_results).length ? non_partitioned_results.big_query_metadata_results.sql : "processing"}</TableDataCell>
                   </TableRow>
 
                   {metadataValuesOfInterest.map(item => {
                     return (
                       <TableRow>
                         <TableDataCell>{item}</TableDataCell>
-                        <TableDataCell>{big_query_metadata_results["partitioned"].data[0][item]["value"]}</TableDataCell>
-                        <TableDataCell>{big_query_metadata_results["non-partitioned"].data[0][item]["value"]}</TableDataCell>
-                      </TableRow>)
+                        <TableDataCell>{Object.keys(partitioned_results).length ? partitioned_results.big_query_metadata_results.data[0][item]["value"] : "processing"}</TableDataCell>
+                        <TableDataCell>{Object.keys(non_partitioned_results).length ? non_partitioned_results.big_query_metadata_results.data[0][item]["value"] : "processing"}</TableDataCell>
+                      </TableRow>
+
+                    )
                   })}
+
+
 
                   <TableRow>
                     <TableDataCell>run_time (seconds)</TableDataCell>
-                    <TableDataCell>{
-                      (Math.abs(Date.parse(big_query_metadata_results["partitioned"].data[0]["end_time"]["value"])
-                        - Date.parse(big_query_metadata_results["partitioned"].data[0]["creation_time"]["value"])) / 1000).toFixed(2)
+                    <TableDataCell>{Object.keys(partitioned_results).length ?
+                      (Math.abs(Date.parse(partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
+                        - Date.parse(partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"])) / 1000).toFixed(2) :
+                      "processing"
                     }</TableDataCell>
-                    <TableDataCell>{
-                      (Math.abs(Date.parse(big_query_metadata_results["non-partitioned"].data[0]["end_time"]["value"])
-                        - Date.parse(big_query_metadata_results["non-partitioned"].data[0]["creation_time"]["value"])) / 1000).toFixed(2)
+                    <TableDataCell>{Object.keys(non_partitioned_results).length ?
+                      (Math.abs(Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
+                        - Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"])) / 1000).toFixed(2) :
+                      "processing"
                     }</TableDataCell>
                   </TableRow>
                 </TableBody>
