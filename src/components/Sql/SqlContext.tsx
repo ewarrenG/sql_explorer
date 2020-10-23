@@ -43,9 +43,9 @@ export interface ISqlContext {
   handleRun: any,
   running: boolean,
   setRunning: any,
-  results: any, setResults: any,
+  // results: any, setResults: any,
   selected_query: any, setSelectedQuery: any,
-  big_query_metadata_results: any, setBigQueryMetadataResults: any
+  // big_query_metadata_results: any, setBigQueryMetadataResults: any
   initial_query_id: any, setInitialQueryId: any,
   partitioned_results: any, setPartitionedResults: any,
   non_partitioned_results: any, setNonPartitionedResults: any,
@@ -67,9 +67,9 @@ export const SqlContextProvider = ({ children }: any) => {
   const [columns, setColumns] = useState()
   const [current_columns, setCurrentColumns] = useState()
   const [table_limit, setTableLimit] = useState(500)
-  const [results, setResults] = useState({})
+  // const [results, setResults] = useState({})
   const [selected_query, setSelectedQuery] = useState()
-  const [big_query_metadata_results, setBigQueryMetadataResults] = useState({})
+  // const [big_query_metadata_results, setBigQueryMetadataResults] = useState({})
   const [initial_query_id, setInitialQueryId] = useState({})
   const [partitioned_results, setPartitionedResults] = useState({})
   const [non_partitioned_results, setNonPartitionedResults] = useState({})
@@ -234,13 +234,10 @@ export const SqlContextProvider = ({ children }: any) => {
 
   const handleRun = () => {
     // console.log('run', { use_model })
-    let partitionedNonPartitionedArr = ["partitioned", "non-partitioned"];
     if (use_model) {
       handleModelRun();
     } else {
-      // handleConnectionRun();
       setRunning(true)
-      // setInitialQueryId(Math.random().toString(16).slice(2, 10))
       setInitialQueryId({
         "partitioned": Math.random().toString(16).slice(2, 10),
         "non-partitioned": Math.random().toString(16).slice(2, 10)
@@ -248,87 +245,13 @@ export const SqlContextProvider = ({ children }: any) => {
     }
   }
 
-  /***
-   * const handleRunConnection = (id) => {
-	return new Promise((async (resolve, reject)=>{
-    	const x = await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`)
-      const y = await x.json()
-      resolve(JSON.stringify(y))
-  }))
-}
-const funky = async () => {
-  var update = ''
-  var ids = [1,2]
-  var arr = []
-  ids.forEach( (id)=>{
-    arr.push(	
-      handleRunConnection(id)
-    )
-  });
-	var arr_prom = await Promise.all(arr)
-	var new_update = arr_prom.join(', ')
- document.getElementById('hi').innerHTML = new_update
-}
-funky();
-   */
 
-
-  //initial_query_id used to be single string
-
-  /**
-   * initial_query_id:
-non-partitioned: "4e5c46cc"
-partitioned: "f44583ac"
-   */
-
-  /**
-   * written_sql:
-non-partitioned: "SELECT wiki, SUM(views) ↵    FROM lookerdata.bq_showcase.wikipedia_v3_non_partition↵    WHERE DATE(datehour) = "2019-01-01" GROUP BY 1 LIMIT 1000"
-partitioned: "SELECT wiki, SUM(views) ↵    FROM lookerdata.bq_showcase.wikipedia_v3_partition↵    WHERE DATE(datehour) = "2019-01-01" GROUP BY 1 LIMIT 1000"
-
-   */
   useEffect(() => {
-    console.log({ initial_query_id, written_sql })
-    // 
+    // console.log({ initial_query_id, written_sql })
     if (Object.keys(initial_query_id).length) {
-
-
 
       handleConnectionRun("non-partitioned")
       handleConnectionRun("partitioned")
-
-
-      //     let handleConnectionRunArr = [];
-      //     async function fetchData() {
-      //       Object.keys(initial_query_id).map(key => {
-      //         handleConnectionRunArr.push(handleConnectionRun(key))
-      //       })
-      //       var arr_prom = await Promise.all(handleConnectionRunArr)
-
-
-      //       // console.log('arr_prom[0]["partitioned"]["results"]', arr_prom[0]["partitioned"]["results"])
-      //       // console.log('arr_prom[0]["partitioned"]["big_query_metadata_results"]', arr_prom[0]["partitioned"]["big_query_metadata_results"])
-      //       // console.log('arr_prom[1]["non-partitioned"]["results"]', arr_prom[1]["non-partitioned"]["results"])
-      //       // console.log('arr_prom[1]["non-partitioned"]["big_query_metadata_results"]', arr_prom[1]["non-partitioned"]["big_query_metadata_results"])
-
-      //       setResults({
-      //         "partitioned": arr_prom[0]["partitioned"]["results"],
-      //         "non-partitioned": arr_prom[1]["non-partitioned"]["results"]
-      //       })
-      //       setBigQueryMetadataResults({
-      //         "partitioned": arr_prom[0]["partitioned"]["big_query_metadata_results"],
-      //         "non-partitioned": arr_prom[1]["non-partitioned"]["big_query_metadata_results"]
-      //       })
-
-      //       setAppParams({
-      //         sql: arr_prom[0]["partitioned"]["app_params"]["sql"],
-      //         qid: arr_prom[0]["partitioned"]["app_params"]["qid"]
-      //       })
-
-      //       setRunning(false)
-
-      //     }
-      //     fetchData()
     }
 
   }, [initial_query_id])
@@ -353,37 +276,15 @@ partitioned: "SELECT wiki, SUM(views) ↵    FROM lookerdata.bq_showcase.wikiped
 
 
   const handleConnectionRun = async (partitionedKey) => { //partitioned
-    console.log('handleConnectionRun')
-    console.log('partitionedKey', partitionedKey)
+    // console.log('handleConnectionRun')
+    // console.log('partitionedKey', partitionedKey)
     // console.log({ t: 'connection', current_connection, written_sql })
     // console.log({ written_sql })
     // console.log({ initial_query_id })
     // start of initial query
-    console.log(written_sql[partitionedKey])
-    console.log(initial_query_id[partitionedKey])
+    // console.log(written_sql[partitionedKey])
+    // console.log(initial_query_id[partitionedKey])
 
-
-    //return new Promise((async (resolve, reject) => {
-    // let returnObj = {
-    //   "non-partitioned": {
-    //     "results": {},
-    //     "big_query_metadata_results": {
-    //     },
-    //     "app_params": {
-    //       "sql": "",
-    //       "qid": ""
-    //     }
-    //   },
-    //   "partitioned": {
-    //     "results": {},
-    //     "big_query_metadata_results": {
-    //     },
-    //     "app_params": {
-    //       "sql": "",
-    //       "qid": ""
-    //     }
-    //   }
-    // }
 
     let returnObj = {}
 
@@ -427,15 +328,7 @@ partitioned: "SELECT wiki, SUM(views) ↵    FROM lookerdata.bq_showcase.wikiped
       returnObj["big_query_metadata_results"] = bigQueryMetadataResponse
     }
 
-    //   resolve(returnObj)
-    // }))
-    // console.log('bottom of handleConnectionRun')
-    // setRunning(false);
-
-    console.log({ returnObj })
-
     partitionedKey === "partitioned" ? setPartitionedResults(returnObj) : setNonPartitionedResults(returnObj);
-
   }
 
   const handleModelRun = async () => {
@@ -462,9 +355,9 @@ partitioned: "SELECT wiki, SUM(views) ↵    FROM lookerdata.bq_showcase.wikiped
     columns,
     handleRun,
     running, setRunning,
-    results, setResults,
+    // results, setResults,
     selected_query, setSelectedQuery,
-    big_query_metadata_results, setBigQueryMetadataResults,
+    // big_query_metadata_results, setBigQueryMetadataResults,
     partitioned_results, setPartitionedResults,
     non_partitioned_results, setNonPartitionedResults
   }

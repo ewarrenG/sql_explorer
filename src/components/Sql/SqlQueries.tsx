@@ -92,13 +92,13 @@ export function SqlQueries() {
     FROM lookerdata.bq_showcase.wikipedia_v3_partition
     WHERE DATE(datehour) = "2019-01-01" GROUP BY 1 LIMIT 1000`,
     // lid: 205
-  }, {
-    label: "Total views",
-    value: `SELECT wiki, SUM(views) 
-    FROM lookerdata.bq_showcase.wikipedia_v3_non_partition
-    WHERE DATE(datehour) = "2019-01-01" GROUP BY 1 LIMIT 1000`,
-    // lid: 205
   }];
+
+  /**
+   * TO DO
+   * implement date picker
+   * 
+   */
 
 
   useEffect(() => {

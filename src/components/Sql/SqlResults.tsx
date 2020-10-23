@@ -11,7 +11,9 @@ import { throttle } from 'lodash';
 const FONT_SIZE = 'xsmall'
 
 export function SqlResults() {
-  const { results, big_query_metadata_results, running, partitioned_results, non_partitioned_results } = useContext(SqlContext)
+  const {
+    // results, big_query_metadata_results, 
+    running, partitioned_results, non_partitioned_results } = useContext(SqlContext)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const targetRef = useRef()
 
@@ -19,7 +21,7 @@ export function SqlResults() {
   // console.log({ non_partitioned_results })
 
 
-  useLayoutEffect(() => {
+  /*useLayoutEffect(() => {
     if (targetRef?.current) {
       setDimensions({
         width: targetRef.current.offsetWidth,
@@ -52,9 +54,9 @@ export function SqlResults() {
         })}
       </TableRow>
     })
-  }
+  }*/
 
-  const metadataValuesOfInterest = ["job_id", "creation_time", "end_time"];
+  const metadataValuesOfInterest = ["job_id", "creation_time", "end_time", "total_bytes_processed", "total_slot_ms"];
 
   return (
     <Box my="xxxlarge" mx="large" height="100%">
@@ -68,59 +70,79 @@ export function SqlResults() {
               <Heading>Metadata from BigQuery</Heading>
             </FlexItem>
 
-            {/* //pull out job_id, state, total_bytes_processed, total_bytes_billed, total_slot_ms */}
-            {/* $5 per tb of data processed */}
-            {/* need to do this calc to show cost */}
 
 
             <FlexItem>
+              {/* Q for group: what do we want to show here?? */}
               <Table>
                 <TableHead>
                   <TableRow>
                     <TableHeaderCell>Metadata</TableHeaderCell>
                     <TableHeaderCell>Parition Value</TableHeaderCell>
                     <TableHeaderCell>Non-Parition Value</TableHeaderCell>
+                    <TableHeaderCell>Difference</TableHeaderCell>
                   </TableRow>
                 </TableHead>
 
                 <TableBody>
-                  <TableRow>
-                    <TableDataCell>INFORMATION_SCHEMA sql</TableDataCell>
-                    <TableDataCell>{Object.keys(partitioned_results).length ? partitioned_results.results.sql : "processing"}</TableDataCell>
-                    <TableDataCell>{Object.keys(non_partitioned_results).length ? non_partitioned_results.results.sql : "processing"}</TableDataCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableDataCell>INFORMATION_SCHEMA sql</TableDataCell>
-                    <TableDataCell>{Object.keys(partitioned_results).length ? partitioned_results.big_query_metadata_results.sql : "processing"}</TableDataCell>
-                    <TableDataCell>{Object.keys(non_partitioned_results).length ? non_partitioned_results.big_query_metadata_results.sql : "processing"}</TableDataCell>
-                  </TableRow>
 
-                  {metadataValuesOfInterest.map(item => {
+                  {metadataValuesOfInterest.map((item, index) => {
                     return (
-                      <TableRow>
-                        <TableDataCell>{item}</TableDataCell>
-                        <TableDataCell>{Object.keys(partitioned_results).length ? partitioned_results.big_query_metadata_results.data[0][item]["value"] : "processing"}</TableDataCell>
-                        <TableDataCell>{Object.keys(non_partitioned_results).length ? non_partitioned_results.big_query_metadata_results.data[0][item]["value"] : "processing"}</TableDataCell>
-                      </TableRow>
+                      <>
+                        <TableRow>
+                          <TableDataCell>{item}</TableDataCell>
+                          <TableDataCell>
+                            {Object.keys(partitioned_results).length ?
+                              partitioned_results.big_query_metadata_results.data[0][item]["value"] :
+                              ''}
+                          </TableDataCell>
+                          <TableDataCell>
+                            {Object.keys(non_partitioned_results).length ?
+                              non_partitioned_results.big_query_metadata_results.data[0][item]["value"] :
+                              index === 0 ? <Spinner /> : ''}</TableDataCell>
+                          <TableDataCell>
+                            {Object.keys(non_partitioned_results).length ?
+                              typeof non_partitioned_results.big_query_metadata_results.data[0][item]["value"] === 'number' ?
+                                Math.abs(partitioned_results.big_query_metadata_results.data[0][item]["value"] - non_partitioned_results.big_query_metadata_results.data[0][item]["value"]) :
+                                'n/a' :
+                              ''}
+                          </TableDataCell>
+                        </TableRow>
 
+                        {
+                          item === "end_time" ?
+
+                            <TableRow>
+                              <TableDataCell>run_time (seconds)</TableDataCell>
+                              <TableDataCell>{Object.keys(partitioned_results).length ?
+                                (Math.abs(Date.parse(partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
+                                  - Date.parse(partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"])) / 1000).toFixed(2) :
+                                ''
+                              }</TableDataCell>
+                              <TableDataCell>{Object.keys(non_partitioned_results).length ?
+                                (Math.abs(Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
+                                  - Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"])) / 1000).toFixed(2) :
+                                ''
+                              }</TableDataCell>
+                              <TableDataCell>
+                                {
+                                  Object.keys(partitioned_results).length && Object.keys(non_partitioned_results).length ?
+                                    Math.abs((Math.abs(Date.parse(partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
+                                      - Date.parse(partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"])) / 1000).toFixed(2) -
+                                      (Math.abs(Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
+                                        - Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"])) / 1000).toFixed(2)).toFixed(2)
+                                    :
+                                    ''
+                                }
+                              </TableDataCell>
+                            </TableRow> : ''
+                        }
+                      </>
                     )
                   })}
 
 
 
-                  <TableRow>
-                    <TableDataCell>run_time (seconds)</TableDataCell>
-                    <TableDataCell>{Object.keys(partitioned_results).length ?
-                      (Math.abs(Date.parse(partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
-                        - Date.parse(partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"])) / 1000).toFixed(2) :
-                      "processing"
-                    }</TableDataCell>
-                    <TableDataCell>{Object.keys(non_partitioned_results).length ?
-                      (Math.abs(Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
-                        - Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"])) / 1000).toFixed(2) :
-                      "processing"
-                    }</TableDataCell>
-                  </TableRow>
                 </TableBody>
               </Table>
             </FlexItem>
