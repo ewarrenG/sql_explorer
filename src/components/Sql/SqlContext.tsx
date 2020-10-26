@@ -276,14 +276,14 @@ export const SqlContextProvider = ({ children }: any) => {
 
 
   const handleConnectionRun = async (partitionedKey) => { //partitioned
-    // console.log('handleConnectionRun')
+    console.log('handleConnectionRun')
     // console.log('partitionedKey', partitionedKey)
     // console.log({ t: 'connection', current_connection, written_sql })
     // console.log({ written_sql })
     // console.log({ initial_query_id })
     // start of initial query
-    // console.log(written_sql[partitionedKey])
-    // console.log(initial_query_id[partitionedKey])
+    console.log(written_sql[partitionedKey])
+    console.log(initial_query_id[partitionedKey])
 
 
     let returnObj = {}
@@ -292,6 +292,7 @@ export const SqlContextProvider = ({ children }: any) => {
       connection_name: current_connection,
       sql: `/* ${initial_query_id[partitionedKey]}*/` + written_sql[partitionedKey]
     }))
+    console.log({ s })
     if (s?.slug) {
       const r = await sdk.ok(sdk.run_sql_query(s.slug, 'json_detail'));
 

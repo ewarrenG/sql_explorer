@@ -78,8 +78,8 @@ export function SqlResults() {
                 <TableHead>
                   <TableRow>
                     <TableHeaderCell>Metadata</TableHeaderCell>
-                    <TableHeaderCell>Parition Value</TableHeaderCell>
-                    <TableHeaderCell>Non-Parition Value</TableHeaderCell>
+                    <TableHeaderCell>Partition Value</TableHeaderCell>
+                    <TableHeaderCell>Non-Partition Value</TableHeaderCell>
                     <TableHeaderCell>Difference</TableHeaderCell>
                   </TableRow>
                 </TableHead>
