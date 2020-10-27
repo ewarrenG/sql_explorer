@@ -49,6 +49,7 @@ export interface ISqlContext {
   initial_query_id: any, setInitialQueryId: any,
   partitioned_results: any, setPartitionedResults: any,
   non_partitioned_results: any, setNonPartitionedResults: any,
+  cost_estimates: any, setCostEstimates: any,
 }
 
 export const SqlContextProvider = ({ children }: any) => {
@@ -73,6 +74,7 @@ export const SqlContextProvider = ({ children }: any) => {
   const [initial_query_id, setInitialQueryId] = useState({})
   const [partitioned_results, setPartitionedResults] = useState({})
   const [non_partitioned_results, setNonPartitionedResults] = useState({})
+  const [cost_estimates, setCostEstimates] = useState({})
 
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
   const sdk = extensionContext.core40SDK
@@ -273,19 +275,22 @@ export const SqlContextProvider = ({ children }: any) => {
     // console.log({ non_partitioned_results })
   }, [non_partitioned_results])
 
+  useEffect(() => {
+    if (written_sql &&
+      written_sql["partitioned"] &&
+      written_sql["non-partitioned"]) {
+      runEstimator(written_sql)
+
+    }
+  }, [written_sql])
+
+  useEffect(() => {
+    // console.log({ cost_estimates })
+  }, [cost_estimates])
 
 
-  const handleConnectionRun = async (partitionedKey) => { //partitioned
-    // console.log('handleConnectionRun')
-    // console.log('partitionedKey', partitionedKey)
-    // console.log({ t: 'connection', current_connection, written_sql })
-    // console.log({ written_sql })
-    // console.log({ initial_query_id })
-    // start of initial query
-    // console.log(written_sql[partitionedKey])
-    // console.log(initial_query_id[partitionedKey])
 
-
+  const handleConnectionRun = async (partitionedKey) => {
     let returnObj = {}
 
     const s = await sdk.ok(sdk.create_sql_query({
@@ -340,6 +345,15 @@ export const SqlContextProvider = ({ children }: any) => {
     setRunning(false);
   }
 
+  const runEstimator = async (written_sql) => {
+    const partitionedEstimate = await sdk.ok(sdk.connection_cost_estimate(current_connection, { "sql": written_sql["partitioned"] }))
+    const nonPartitionedEstimate = await sdk.ok(sdk.connection_cost_estimate(current_connection, { "sql": written_sql["non-partitioned"] }))
+    setCostEstimates({
+      "partitioned": partitionedEstimate,
+      "non-partitioned": nonPartitionedEstimate
+    })
+  }
+
   const context: ISqlContext = {
     connections,
     models,
@@ -360,7 +374,8 @@ export const SqlContextProvider = ({ children }: any) => {
     selected_query, setSelectedQuery,
     // big_query_metadata_results, setBigQueryMetadataResults,
     partitioned_results, setPartitionedResults,
-    non_partitioned_results, setNonPartitionedResults
+    non_partitioned_results, setNonPartitionedResults,
+    cost_estimates, setCostEstimates,
   }
 
   return <SqlContext.Provider

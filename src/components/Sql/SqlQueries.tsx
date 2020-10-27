@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { ExtensionContextData, ExtensionContext } from '@looker/extension-sdk-react';
 import {
   Tabs, TabList, Tab, TabPanels, TabPanel, Box, Grid, Paragraph, Select,
-  Popover, Button
+  Popover, Button, Table, TableBody, TableHead, TableRow, TableHeaderCell, TableDataCell,
 } from '@looker/components';
 
 import { InputDateRange } from '@looker/components/lib/InputDateRange'
@@ -23,8 +23,8 @@ import AppContext from '../../AppContext';
  */
 export function SqlQueries() {
   const extensionContext = useContext<ExtensionContextData>(ExtensionContext)
-  const sdk = extensionContext.coreSDK
-  const { use_model, setUseModel, current_tables, selected_query, setSelectedQuery, setWrittenSql, written_sql } = useContext(SqlContext)
+  const sdk = extensionContext.core40SDK
+  const { use_model, setUseModel, current_tables, selected_query, setSelectedQuery, setWrittenSql, written_sql, current_connection, cost_estimates, setCostEstimates } = useContext(SqlContext)
   const { setAppParams } = useContext(AppContext)
 
   const [selectedDateRange, setSelectedDateRange] = useState({
@@ -39,14 +39,53 @@ export function SqlQueries() {
   const todaysDate = new Date()
   const todaysDateSqlFormat = todaysDate.toISOString().split('T')[0];
 
-  const dropdownSqlQueries = [{
+  const dropdownSqlQueries = [
+    /*{
     label: "Total views",
     value: `SELECT wiki, SUM(views) 
     FROM lookerdata.bq_showcase.wikipedia_v3_partition
     WHERE DATE(datehour) = "${todaysDateSqlFormat}" GROUP BY 1 LIMIT 1000`,
     // lid: 205
-  }];
+  },*/
+    {
+      label: "COVID Wikis",
+      value: `
+      -- raw sql results do not include filled-in values for 'wikipedia_v3_partition.datehour_hour_of_day'
 
+
+SELECT
+	EXTRACT(HOUR FROM TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', wikipedia_v3_partition.datehour , 'America/Los_Angeles'))) AS wikipedia_v3_partition_datehour_hour_of_day,
+	COALESCE(SUM(wikipedia_v3_partition.views ), 0) AS wikipedia_v3_partition_total_views,
+	AVG(wikipedia_v3_partition.views ) AS wikipedia_v3_partition_avg_views
+FROM lookerdata.bq_showcase.wikipedia_v3_partition
+     AS wikipedia_v3_partition
+
+WHERE (wikipedia_v3_partition.datehour = "${todaysDateSqlFormat}") 
+AND (wikipedia_v3_partition.title LIKE '%covid%')
+GROUP BY 1
+ORDER BY 1
+LIMIT 500`,
+      lid: 229
+    }, {
+      label: "Kobe Bryant Avg Views",
+      value: `
+      -- raw sql results do not include filled-in values for 'wikipedia_v3_partition.datehour_month'
+
+
+SELECT
+	FORMAT_TIMESTAMP('%Y-%m', TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', wikipedia_v3_partition.datehour , 'America/Los_Angeles'))) AS wikipedia_v3_partition_datehour_month,
+	AVG(wikipedia_v3_partition.views ) AS wikipedia_v3_partition_avg_views
+FROM lookerdata.bq_showcase.wikipedia_v3_partition
+     AS wikipedia_v3_partition
+
+WHERE (wikipedia_v3_partition.datehour = "${todaysDateSqlFormat}")  
+AND (wikipedia_v3_partition.title = 'Kobe_Bryant')
+GROUP BY 1
+ORDER BY 1 DESC
+LIMIT 500`,
+      lid: 228
+    }
+  ];
 
   useEffect(() => {
     if (!selected_query) {
@@ -57,12 +96,12 @@ export function SqlQueries() {
 
   useEffect(() => {
     // console.log('useEffect selected_query', selected_query)
-    setWrittenSql(selected_query ? { "partitioned": selected_query, "non-partitioned": selected_query.replace("partition", "non_partition") } : {})
+    setCostEstimates({})
+    setWrittenSql(selected_query ? { "partitioned": selected_query, "non-partitioned": selected_query.replaceAll("partition", "non_partition") } : {})
   }, [selected_query])
 
   useEffect(() => {
     // console.log('useEffect written_sql', written_sql)
-
   }, [written_sql])
 
   useEffect(() => {
@@ -92,7 +131,6 @@ export function SqlQueries() {
             <InputDateRange
               defaultValue={selectedDateRange}
               onChange={(value) => {
-                console.log({ value })
                 /**
                  * Need to add logic to prevent date change here
                  */
@@ -105,13 +143,37 @@ export function SqlQueries() {
       >
         <Button>
           <DateFormat>{selectedDateRange.from}</DateFormat> &mdash;
-        <DateFormat>{selectedDateRange.to}</DateFormat>
+      <DateFormat>{selectedDateRange.to}</DateFormat>
         </Button>
       </Popover >
+      {Object.keys(cost_estimates).length ?
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableHeaderCell>Estimate</TableHeaderCell>
+              <TableHeaderCell>Partition Value</TableHeaderCell>
+              <TableHeaderCell>Non Partition Value</TableHeaderCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            <TableRow>
+              <TableDataCell>Message</TableDataCell>
+              <TableDataCell>{cost_estimates["partitioned"].message}</TableDataCell>
+              <TableDataCell>{cost_estimates["non-partitioned"].message}</TableDataCell>
+            </TableRow>
+            <TableRow>
+              <TableDataCell>Cost</TableDataCell>
+              <TableDataCell>{cost_estimates["partitioned"].cost}</TableDataCell>
+              <TableDataCell>{cost_estimates["non-partitioned"].cost}</TableDataCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+        : ''}
     </Grid >
+
   );
 }
-
 
 const DateDiff = {
 
@@ -144,17 +206,14 @@ const DateDiff = {
 }
 
 function queryDateRangeHelper(selectedQuery, selectedDateRange) {
-
-  let whereClause = selectedQuery.substring(selectedQuery.indexOf("WHERE"), selectedQuery.indexOf("GROUP BY"))
-
+  let whereClause = selectedQuery.substring(selectedQuery.indexOf("WHERE"), selectedQuery.indexOf("AND (wikipedia_v3_partition"))
   if (DateDiff.inDays(selectedDateRange.from, selectedDateRange.to) > 1) {
-    let newWhereClause = `WHERE DATE(datehour) BETWEEN "${selectedDateRange.from.toISOString().split('T')[0]}" AND "${selectedDateRange.to.toISOString().split('T')[0]}" `;
+    let newWhereClause = `WHERE DATE(wikipedia_v3_partition.datehour) BETWEEN "${selectedDateRange.from.toISOString().split('T')[0]}" AND "${selectedDateRange.to.toISOString().split('T')[0]}" `;
     selectedQuery = selectedQuery.replace(whereClause, newWhereClause)
 
   } else {
-    let newWhereClause = `WHERE DATE(datehour) = "${selectedDateRange.to.toISOString().split('T')[0]}" `
+    let newWhereClause = `WHERE DATE(wikipedia_v3_partition.datehour) = "${selectedDateRange.to.toISOString().split('T')[0]}" `
     selectedQuery = selectedQuery.replace(whereClause, newWhereClause)
   }
-  // setSelectedQuery(selectedQueryCopy)
   return selectedQuery
 }

@@ -92,14 +92,14 @@ export const Sidebar: React.FC<any> = ({ selection, last_selection, refresh_qid,
           </SidebarMenuItem>
       {(selection === ROUTES.EMBED_DASHBOARD) && <SidebarDashboard />} */}
 
-      {/* <SidebarMenuItem
+      <SidebarMenuItem
         route={ROUTES.EMBED_LOOK}
         refresh={refresh_lid}
         icon="Reports"
       >
         View Look
           </SidebarMenuItem>
-      {(selection === ROUTES.EMBED_LOOK) && <SidebarLook />} */}
+      {(selection === ROUTES.EMBED_LOOK) && <SidebarLook />}
 
       {/* {editing && <SidebarEditing />}
       <SidebarMenuItem
