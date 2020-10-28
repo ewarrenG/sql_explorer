@@ -149,22 +149,22 @@ export function SqlResults() {
                                   <TableRow>
                                     <TableDataCell>run_time (seconds)</TableDataCell>
                                     <TableDataCell>{Object.keys(partitioned_results).length ?
-                                      (Date.parse(partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
-                                        - Date.parse(partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"]) / 1000).toFixed(2) :
+                                      ((Date.parse(partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
+                                        - Date.parse(partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"])) / 1000).toFixed(2) :
                                       ''
                                     }</TableDataCell>
                                     <TableDataCell>{Object.keys(non_partitioned_results).length ?
-                                      (Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
-                                        - Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"]) / 1000).toFixed(2) :
+                                      ((Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
+                                        - Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"])) / 1000).toFixed(2) :
                                       ''
                                     }</TableDataCell>
                                     <TableDataCell color="green">
                                       {
                                         Object.keys(partitioned_results).length && Object.keys(non_partitioned_results).length ?
                                           ((Date.parse(partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
-                                            - Date.parse(partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"]) / 1000).toFixed(2)) -
+                                            - Date.parse(partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"])) / 1000).toFixed(2) -
                                           ((Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["end_time"]["value"])
-                                            - Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"]) / 1000).toFixed(2))
+                                            - Date.parse(non_partitioned_results.big_query_metadata_results.data[0]["creation_time"]["value"])) / 1000).toFixed(2)
                                           :
                                           ''
                                       }
